@@ -1,0 +1,44 @@
+// components/CustomInput.scss
+
+.custom-input {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+
+  label {
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .input-box {
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s ease;
+
+    &:focus {
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    &.filled {
+      background-color: #fafafa;
+    }
+  }
+
+  &.error {
+    .input-box {
+      border-color: #e74c3c;
+      background-color: #fff6f6;
+    }
+
+    .error-text {
+      color: #e74c3c;
+      margin-top: 0.3rem;
+      font-size: 0.85rem;
+    }
+  }
+}

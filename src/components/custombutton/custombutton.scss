@@ -1,0 +1,40 @@
+// Keep this
+.default-submit-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  &.danger {
+    background-color: #dc3545;
+
+    &:hover {
+      background-color: #c82333;
+    }
+  }
+
+  &.success {
+    background-color: #28a745;
+
+    &:hover {
+      background-color: #218838;
+    }
+  }
+}
