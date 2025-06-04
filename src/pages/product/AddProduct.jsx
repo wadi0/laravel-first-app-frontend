@@ -6,6 +6,7 @@ import ApiUrlServices from '../../components/network/ApiUrlServices.jsx';
 import CustomFileUpload from "../../components/customfileupload/CustomFileUpload.jsx";
 import CustomInput from "../../components/customInput/CustomInput.jsx";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
+import CustomFileUploadWithPreview from "../../components/customfileupload/CustomFileUpload.jsx";
 
 const AddProduct = () => {
     const [loading, setLoading] = useState(false);
@@ -69,7 +70,11 @@ const AddProduct = () => {
                                 type="text"
                             />
 
-                            <CustomFileUpload name="image" label="Product Image"/>
+                            {/*<CustomFileUpload name="image" label="Product Image"/>*/}
+                            <CustomFileUploadWithPreview
+  name="image"
+  label="Product Image"
+/>
                             <CustomInput
                                 name="description"
                                 label="Product description"
