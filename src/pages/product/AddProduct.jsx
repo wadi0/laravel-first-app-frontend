@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Formik, Form, Field, ErrorMessage} from 'formik';
 import {useNavigate} from 'react-router-dom';
 import AxiosServices from '../../components/network/AxiosServices.jsx';
@@ -7,24 +7,32 @@ import CustomFileUpload from "../../components/customfileupload/CustomFileUpload
 import CustomInput from "../../components/customInput/CustomInput.jsx";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import CustomFileUploadWithPreview from "../../components/customfileupload/CustomFileUpload.jsx";
+import path from "../../routes/path.jsx";
 
-const AddProduct = () => {
+const AddProduct = ({product, onSuccess}) => {
     const [loading, setLoading] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
     const navigate = useNavigate();
 
     const initialValues = {
-        name: '',
-        price: '',
-        description: '',
+        name: product?.name || '',
+        price: product?.price || '',
+        description: product?.description || '',
         image: null
     };
+
+    useEffect(() => {
+        if (product?.image) {
+            setPreviewImage(`http://localhost:8000/storage/${product.image}`);
+        }
+    }, [product]);
 
     const validate = (values) => {
         const errors = {};
         if (!values.name.trim()) errors.name = 'Product name is required';
         if (!values.price.trim()) errors.price = 'Product price is required';
         if (!values.description.trim()) errors.description = 'Description is required';
-        if (!values.image) errors.image = 'Image is required';
+        if (!product && !values.image) errors.image = 'Image is required';
         return errors;
     };
 
@@ -34,28 +42,63 @@ const AddProduct = () => {
         formData.append('name', values.name);
         formData.append('price', values.price);
         formData.append('description', values.description);
-        formData.append('image', values.image);
+        if (values.image) {
+            formData.append('image', values.image);
+        }
 
         try {
-            const response = await AxiosServices.post(ApiUrlServices.ADD_PRODUCT, formData, true);
-            console.log('Product added successfully:', response.data);
-            // navigate('/products');
+            let response;
+            if (product) {
+                // Update existing product
+                response = await AxiosServices.post(
+                    ApiUrlServices.UPDATE_PRODUCT(product.id),
+                    formData,
+                    true
+                );
+            } else {
+                // Create new product
+                response = await AxiosServices.post(
+                    ApiUrlServices.ADD_PRODUCT,
+                    formData,
+                    true
+                );
+            }
+
+            console.log('Product saved successfully:', response.data);
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                navigate(path.home);
+            }
         } catch (error) {
-            console.error('Error adding product:', error);
+            console.error('Error saving product:', error);
         } finally {
             setLoading(false);
         }
     };
 
+    const handleImageChange = (setFieldValue, file) => {
+        setFieldValue('image', file);
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setPreviewImage(null);
+        }
+    };
+
     return (
         <div>
-            <h2>Add Product</h2>
             <Formik
                 initialValues={initialValues}
                 validate={validate}
                 onSubmit={handleSubmit}
+                enableReinitialize
             >
-                {() => (
+                {({setFieldValue}) => (
                     <Form encType="multipart/form-data">
                         <div className="textbox">
                             <CustomInput
@@ -70,22 +113,40 @@ const AddProduct = () => {
                                 type="text"
                             />
 
-                            {/*<CustomFileUpload name="image" label="Product Image"/>*/}
-                            <CustomFileUploadWithPreview
-  name="image"
-  label="Product Image"
-/>
+                            <div className="form-group">
+                                <label>Product Image</label>
+                                {previewImage && (
+                                    <div className="image-preview">
+                                        <img
+                                            src={previewImage}
+                                            alt="Preview"
+                                            style={{maxWidth: '200px', maxHeight: '200px'}}
+                                        />
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    onChange={(event) => {
+                                        handleImageChange(
+                                            setFieldValue,
+                                            event.currentTarget.files[0]
+                                        );
+                                    }}
+                                />
+                                <ErrorMessage name="image" component="div" className="error-message" />
+                            </div>
+
                             <CustomInput
                                 name="description"
                                 label="Product description"
                                 placeholder="Enter product description"
+                                as="textarea"
                             />
                         </div>
                         <CustomSubmitButton
                             isLoading={loading}
-                            // onClick={addProductForm}
                             type="submit"
-                            label="Submit"
+                            label={product ? "Update Product" : "Add Product"}
                         />
                     </Form>
                 )}

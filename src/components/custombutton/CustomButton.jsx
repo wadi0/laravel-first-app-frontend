@@ -1,51 +1,51 @@
 import React from 'react';
-import "./custombutton.scss"
+import "./custombutton.scss";
 
-const CustomSubmitButton = ({isLoading, onClick, label, type, btnClassName}) => {
-    return (
-        <button
-            type={type}
-            onClick={onClick}
-            disabled={isLoading}
-            className={`default-submit-btn ${btnClassName ? btnClassName : ''}`}
-            // style={{
-            //     backgroundColor: isLoading ? '#aaa' : '#007bff',
-            //     color: '#fff',
-            //     padding: '10px 20px',
-            //     fontSize: '16px',
-            //     borderRadius: '6px',
-            //     border: 'none',
-            //     cursor: isLoading ? 'not-allowed' : 'pointer',
-            //     display: 'flex',
-            //     alignItems: 'center',
-            //     justifyContent: 'center',
-            //     minWidth: '120px',
-            // }}
-        >
-            {isLoading ? (
-                <div style={{
-                    width: '20px',
-                    height: '20px',
-                    border: '3px solid #f3f3f3',
-                    borderTop: '3px solid #fff',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                }}/>
-            ) : (
-                label
-            )}
+const CustomSubmitButton = (props) => {
+  const handleClick = (e) => {
+    if (props.type !== "submit" && props.onClick) {
+      e.preventDefault(); // submit নয় এমন বাটনে prevent
+      props.onClick(e);
+    }
+  };
 
-            {/* Spinner animation */}
-            <style>
-                {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-            </style>
-        </button>
-    );
+  return (
+    <button
+      type={props.type || "button"}
+      onClick={handleClick}
+      disabled={props.isLoading}
+      className={`default-submit-btn ${props.btnClassName || ''}`}
+    >
+      <div className="btn-content">
+        {props.isLoading && <div className="spinner" />}
+        <span>{props.label}</span>
+      </div>
+    </button>
+  );
 };
 
 export default CustomSubmitButton;
+
+
+// 🧪 উদাহরণ ১: Formik সহ
+// <Formik initialValues={...} onSubmit={handleSubmit}>
+//   <Form>
+//     <CustomSubmitButton
+//       isLoading={loading}
+//       type="submit"
+//       label="Login"
+//     />
+//   </Form>
+// </Formik>
+
+
+// 🧪 উদাহরণ ২: Formik ছাড়া
+// <CustomSubmitButton
+//   isLoading={loading}
+//   type="button"
+//   label="Delete"
+//   onClick={() => {
+//     console.log("Delete button clicked!");
+//     // custom delete logic
+//   }}
+// />

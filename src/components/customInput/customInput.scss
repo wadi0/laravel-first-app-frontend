@@ -1,31 +1,53 @@
-// components/CustomInput.scss
-
 .custom-input {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.5rem;
 
   label {
     margin-bottom: 0.4rem;
     font-weight: 500;
     color: #333;
+    text-align: left;
   }
 
-  .input-box {
-    padding: 0.75rem 1rem;
-    border: 1.5px solid #ccc;
-    border-radius: 6px;
-    font-size: 1rem;
-    outline: none;
-    transition: all 0.2s ease;
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 
-    &:focus {
-      border-color: #4a90e2;
-      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    .input-box {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      padding-right: 2.5rem;
+      border: 1.5px solid var(--color-gray);
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s ease;
+      height: 45px;
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-gray);
+        box-shadow: none;
+      }
+
+      &.filled {
+        background-color: #fafafa;
+      }
     }
 
-    &.filled {
-      background-color: #fafafa;
+    .eye-toggle {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 1rem;
+      color: #888;
+
+      &:hover {
+        color: #333;
+      }
     }
   }
 
@@ -39,6 +61,7 @@
       color: #e74c3c;
       margin-top: 0.3rem;
       font-size: 0.85rem;
+      font-weight: 500;
     }
   }
 }

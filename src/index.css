@@ -1,45 +1,55 @@
+@import "@fontsource/inter/200.css";
+@import "@fontsource/inter/300.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+@import "@fontsource/inter/900.css";
+
 :root {
-  /*font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;*/
-  /*color-scheme: light dark;*/
-  /*color: rgba(255, 255, 255, 0.87);*/
-  /*background-color: #242424;*/
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    --bs-body-line-height: 1 !important;
 
-  /*font-synthesis: none;*/
-  /*text-rendering: optimizeLegibility;*/
-  /*-webkit-font-smoothing: antialiased;*/
-  /*-moz-osx-font-smoothing: grayscale;*/
+    --color-black: black;
+    --color-white: #ffffff;
+    --color-primary: #1973B1;
+    --color-gray: gray;
 
-  --color-text: #3c3849;
-  --color-muted: #adabb4;
-  --color-primary: #8a6bf1;
-  --color-background: #ebe8ff;
-  --color-white: #ffffff;
-  --color-f6f6f6: #f6f6f6;
-  --color-f9f9f9: #f9f9f9;
-  --color-eee: #eeeeee;
-  --color-black: black;
-  --color-box-shadow: rgba(0, 0, 0, 0.05);
-  --color-box-shadow-dark: rgba(0, 0, 0, 0.15)
+
+    --color-text: #3c3849;
+    --color-muted: #adabb4;
+    --color-background: #ebe8ff;
+    --color-f6f6f6: #f6f6f6;
+    --color-f9f9f9: #f9f9f9;
+    --color-eee: #eeeeee;
+
+
+    --color-box-shadow: rgba(0, 0, 0, 0.05);
+    --color-box-shadow-dark: rgba(0, 0, 0, 0.15)
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
 }
+
 /*a:hover {*/
 /*  color: #535bf2;*/
 /*}*/
 
 body {
-  margin: 0;
-  /*display: flex;*/
-  /*place-items: center;*/
-
-  background: var(--color-background);
-  color: var(--color-text);
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-text);
 }
 
-h1,h2,h3,h4,h5,h6,p {
-  margin: 0;
+h1, h2, h3, h4, h5, h6, p {
+    margin: 0 !important;
+}
+
+.anchor-tag {
+    text-decoration: none;
 }

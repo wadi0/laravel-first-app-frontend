@@ -3,91 +3,156 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 50px 0;
+  padding: 20px;
+  background-color: var(--color-white);
+
 }
 
-.card {
+.signin-card {
   margin: 0 auto;
   background: var(--color-white);
-  border-radius: 30px;
+  border-radius: 20px;
   width: 65%;
   max-width: 800px;
-  padding: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.08), /* top */
+  0 6px 16px rgba(0, 0, 0, 0.12), /* bottom */
+  6px 0 16px rgba(0, 0, 0, 0.08), /* right */
+  -6px 0 16px rgba(0, 0, 0, 0.08); /* left */
+
+  .image {
+    border-radius: 20px;
+    overflow: hidden;
+    width: 100%;
+    height: auto;
+  }
+
+  .image .img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+  }
 }
 
-.image {
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
-  width: 100%;
-  height: 280px;
-}
-
-.image > img {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  top: 0;
-  left: 0;
-}
-
-.content {
+.signin-content {
   flex: 1 1 50%;
-  padding: 0 20px 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: left;
-}
 
-.content > img {
-  height: 24px;
-  margin-top: 50px;
-  margin-bottom: 10px;
-}
-
-h2 {
-  font-weight: 400;
-  font-size: 18px;
-  margin: 0 0 40px;
-  color: var(--color-muted);
-}
-
-/* Responsive Fix */
-@media (min-width: 780px) {
-  .signIn_container {
-    display: block;
-    padding: 60px 0;
+  .signin-title {
+    font-size: 25px;
+    color: var(--color-primary);
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
   }
 
-  .card {
+  .signin-form {
+    width: 100%;
+    margin: 15px 0;
+
+    .signin-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-gray);
+    }
+
+    .signin-input {
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 6px;
+    }
+
+    .signin-btn {
+      width: 100%;
+    }
+  }
+
+  .forgot-pass-signup-link {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+
+    .forgot-password, .signup-link {
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: underline;
+      color: var(--color-primary);
+    }
+
+    .already-account {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+  }
+}
+
+@media (min-width: 780px) {
+  .signin-card {
     width: 85%;
     flex-direction: row;
     align-items: stretch;
+
+    .image {
+      width: 45%;
+      height: auto;
+
+      .img {
+        height: 100%;
+        object-fit: cover;
+      }
+    }
   }
 
-  .card .image {
-    width: 45%;
-    height: auto;
-  }
 
-  .card .image img {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .card .content {
+  .signin-card .signin-content {
     align-items: flex-start;
-    padding: 0 32px 20px;
-  }
-
-  .card .content img {
-    margin-top: 60px;
   }
 }
+
+@media (max-width: 779px) and (min-width: 501px) {
+  .signin-card {
+    flex-direction: column;
+    width: 70%;
+    border-radius: 10px;
+
+    .image {
+      width: 100%;
+      height: 250px;
+      border-radius: 10px;
+
+      .img {
+        height: 100%;
+        border-radius: 10px;
+      }
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .signin-card {
+    width: 95%;
+    border-radius: 10px;
+
+    .image {
+      height: 200px;
+      border-radius: 10px;
+
+      .img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+    }
+  }
+}
+

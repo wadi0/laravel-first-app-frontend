@@ -1,6 +1,9 @@
-import { useState } from "react";
+import {useState} from "react";
 
 export const useAuth = () => {
-  const [isLoggedIn] = useState(!!localStorage.getItem("token")); // 'token' থাকলে logged in
-  return { isLoggedIn };
+    const user = JSON.parse(localStorage.getItem("user"));
+    return {
+        isLoggedIn: !!user?.token,
+        user
+    };
 };

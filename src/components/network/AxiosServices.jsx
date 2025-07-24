@@ -11,7 +11,8 @@ const apiClient = axios.create({
 
 // ✅ Request Interceptor (যদি টোকেন লাগে)
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // অথবা অন্য যেকোনো ভাবে টোকেন নাও
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = user?.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

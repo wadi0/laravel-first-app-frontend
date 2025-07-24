@@ -10,6 +10,7 @@ const Product = () => {
 
     const [productList, setProductList] = useState([])
     const [showModal, setShowModal] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
 
     const toggleModal = () => {
         setShowModal(!showModal);
@@ -30,6 +31,36 @@ const Product = () => {
 
             })
     }
+
+    const deleteProduct = async (id) => {
+        await AxiosServices.delete(ApiUrlServices.DELETE_PRODUCT(id))
+            .then((res) => {
+                gelAllProductList()
+                alert("Product deleted successfully!");
+            }).catch((err) => {
+                console.log(err)
+            }).finally(() => {
+
+            })
+    }
+
+    const UpdateProduct = async (id) => {
+        await AxiosServices.post(ApiUrlServices.UPDATE_PRODUCT(id))
+            .then((res) => {
+                gelAllProductList()
+                alert("Product Updated successfully!");
+            }).catch((err) => {
+                console.log(err)
+            }).finally(() => {
+
+            })
+    }
+
+    const handleEdit = (product) => {
+        setEditingProduct(product);
+        // setModalTitle("Edit Product");
+        setShowModal(true);
+    };
 
     return (
 
@@ -55,6 +86,18 @@ const Product = () => {
                         <h3 className="product-name">{product.name}</h3>
                         <h3 className="product-name">{product.description}</h3>
                         <h3 className="product-name">${product.price}</h3>
+                        <CustomSubmitButton
+                                onClick={() => handleEdit(product)}
+                                type="button"
+                                label="Edit"
+                                btnClassName="edit-btn"
+                            />
+                        <CustomSubmitButton
+                            // isLoading={loading}
+                            onClick={()=> deleteProduct(product.id)}
+                            type="submit"
+                            label="Delete"
+                        />
                     </div>
                 ))}
             </div>
@@ -62,11 +105,17 @@ const Product = () => {
             <CustomModal
                 isOpen={showModal}
                 onClose={toggleModal}
-                title="Add New Product"
+                title={editingProduct !== null ? "Update Product" : "Add New Product"}
                 // modalClass="your-custom-class-if-needed"
                 // size="700px"
             >
-                <AddProduct/>
+                <AddProduct
+                    product={editingProduct}
+                    onSuccess={() => {
+                        gelAllProductList();
+                        toggleModal();
+                    }}
+                />
             </CustomModal>
         </div>
     )

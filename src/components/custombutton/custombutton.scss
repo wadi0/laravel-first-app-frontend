@@ -1,40 +1,408 @@
-// Keep this
 .default-submit-btn {
+  position: relative;
+  overflow: hidden;
   background-color: #007bff;
   color: #fff;
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
-  transition: 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+  height: 45px;
+
+  /* Ensure layer above sliding bg */
+  z-index: 0;
+}
+
+.default-submit-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #0056b3, #00aaff);
+  transition: left 0.4s ease;
+  z-index: -1;
+  border-radius: 6px;
+}
+
+.default-submit-btn:hover:not(:disabled)::before {
+  left: 0;
+}
+
+.default-submit-btn:hover:not(:disabled) {
+  color: #fff;
+}
+
+.default-submit-btn:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+.default-submit-btn:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.default-submit-btn .btn-content {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-
-  &.danger {
-    background-color: #dc3545;
-
-    &:hover {
-      background-color: #c82333;
-    }
-  }
-
-  &.success {
-    background-color: #28a745;
-
-    &:hover {
-      background-color: #218838;
-    }
-  }
+  gap: 10px;
+  position: relative;
+  z-index: 1;
 }
+
+.default-submit-btn .spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Utility classes you might still want */
+
+.default-submit-btn.center {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.default-submit-btn.full-width {
+  width: 100%;
+}
+
+.default-submit-btn.small {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.default-submit-btn.large {
+  padding: 16px 32px;
+  font-size: 18px;
+}
+
+
+
+//.default-submit-btn {
+//  position: relative;
+//  padding: 12px 24px;
+//  font-size: 16px;
+//  font-weight: 600;
+//  background-color: transparent;
+//  color: #007bff;
+//  border: 2px solid #007bff;
+//  border-radius: 6px;
+//  cursor: pointer;
+//  overflow: hidden;
+//  transition: color 0.4s ease;
+//  z-index: 1;
+//
+//  &:hover {
+//    color: #fff;
+//  }
+//
+//  &::before {
+//    content: "";
+//    position: absolute;
+//    top: 0;
+//    left: -100%;
+//    width: 100%;
+//    height: 100%;
+//    background-color: #007bff;
+//    z-index: -1;
+//    transition: left 0.4s ease;
+//  }
+//
+//  &:hover::before {
+//    left: 0;
+//  }
+//
+//  &:disabled {
+//    color: #999;
+//    border-color: #ccc;
+//    cursor: not-allowed;
+//  }
+//
+//  .btn-content {
+//    display: flex;
+//    align-items: center;
+//    justify-content: center;
+//    gap: 8px;
+//  }
+//
+//  .spinner {
+//    width: 18px;
+//    height: 18px;
+//    border: 3px solid rgba(255, 255, 255, 0.3);
+//    border-top: 3px solid #fff;
+//    border-radius: 50%;
+//    animation: spin 1s linear infinite;
+//  }
+//}
+//
+//@keyframes spin {
+//  0% { transform: rotate(0deg); }
+//  100% { transform: rotate(360deg); }
+//}
+
+
+
+
+
+
+//.default-submit-btn {
+//  position: relative;
+//  overflow: hidden;
+//  background-color: #007bff;
+//  color: #fff;
+//  padding: 12px 24px;
+//  font-size: 16px;
+//  font-weight: 600;
+//  border-radius: 8px;
+//  border: none;
+//  cursor: pointer;
+//  display: inline-flex;
+//  align-items: center;
+//  justify-content: center;
+//  gap: 10px;
+//  transition: all 0.3s ease;
+//  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 14px rgba(0, 123, 255, 0.4);
+//
+//  &:hover:not(:disabled) {
+//    background-color: #006ae0;
+//    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 6px 18px rgba(0, 123, 255, 0.5);
+//  }
+//
+//  &:hover::before {
+//    content: '';
+//    position: absolute;
+//    top: -50%;
+//    left: -50%;
+//    width: 200%;
+//    height: 200%;
+//    background: linear-gradient(
+//      60deg,
+//      transparent 0%,
+//      rgba(255, 255, 255, 0.25) 50%,
+//      transparent 100%
+//    );
+//    transform: rotate(25deg);
+//    animation: shine-sweep 1.2s ease forwards;
+//    pointer-events: none;
+//  }
+//
+//  &:active:not(:disabled) {
+//    transform: scale(0.97);
+//    box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+//  }
+//
+//  &:disabled {
+//    background-color: #ccc;
+//    cursor: not-allowed;
+//    box-shadow: none;
+//  }
+//
+//  .btn-content {
+//    display: flex;
+//    align-items: center;
+//    justify-content: center;
+//  }
+//
+//  .spinner {
+//    width: 18px;
+//    height: 18px;
+//    border: 3px solid rgba(255, 255, 255, 0.3);
+//    border-top: 3px solid #fff;
+//    border-radius: 50%;
+//    animation: spin 1s linear infinite;
+//  }
+//
+//  &.center {
+//    margin-left: auto;
+//    margin-right: auto;
+//    display: block;
+//  }
+//
+//  &.full-width {
+//    width: 100%;
+//  }
+//
+//  &.small {
+//    padding: 8px 16px;
+//    font-size: 14px;
+//  }
+//
+//  &.large {
+//    padding: 16px 32px;
+//    font-size: 18px;
+//  }
+//
+//  &.danger {
+//    background-color: #dc3545;
+//
+//    &:hover:not(:disabled) {
+//      background-color: #c82333;
+//      box-shadow: 0 6px 18px rgba(220, 53, 69, 0.5);
+//    }
+//
+//    &:hover::before {
+//      background: linear-gradient(
+//        60deg,
+//        transparent 0%,
+//        rgba(255, 255, 255, 0.2) 50%,
+//        transparent 100%
+//      );
+//    }
+//  }
+//
+//  &.success {
+//    background-color: #28a745;
+//
+//    &:hover:not(:disabled) {
+//      background-color: #218838;
+//      box-shadow: 0 6px 18px rgba(40, 167, 69, 0.5);
+//    }
+//
+//    &:hover::before {
+//      background: linear-gradient(
+//        60deg,
+//        transparent 0%,
+//        rgba(255, 255, 255, 0.2) 50%,
+//        transparent 100%
+//      );
+//    }
+//  }
+//}
+//
+//@keyframes spin {
+//  0% { transform: rotate(0deg); }
+//  100% { transform: rotate(360deg); }
+//}
+//
+//@keyframes shine-sweep {
+//  0% {
+//    left: -75%;
+//    top: -75%;
+//    opacity: 0;
+//  }
+//  50% {
+//    opacity: 1;
+//  }
+//  100% {
+//    left: 150%;
+//    top: 150%;
+//    opacity: 0;
+//  }
+//}
+
+
+
+
+
+
+
+
+//main button
+
+
+//.default-submit-btn {
+//  background-color: #007bff;
+//  color: #fff;
+//  padding: 12px 24px;
+//  font-size: 16px;
+//  font-weight: 500;
+//  border-radius: 6px;
+//  border: none;
+//  cursor: pointer;
+//  transition: all 0.3s ease;
+//  display: inline-flex;
+//  align-items: center;
+//  justify-content: center;
+//
+//  &:hover {
+//    background-color: #0056b3;
+//  }
+//
+//  &:disabled {
+//    background-color: #ccc;
+//    cursor: not-allowed;
+//  }
+//
+//  .btn-content {
+//    display: flex;
+//    align-items: center;
+//    justify-content: center;
+//    gap: 10px; // spinner & label এর মাঝে space
+//  }
+//
+//  .spinner {
+//    width: 18px;
+//    height: 18px;
+//    border: 3px solid #f3f3f3;
+//    border-top: 3px solid #fff;
+//    border-radius: 50%;
+//    animation: spin 1s linear infinite;
+//  }
+//
+//  &.center {
+//    margin-left: auto;
+//    margin-right: auto;
+//    display: block;
+//  }
+//
+//  &.full-width {
+//    width: 100%;
+//  }
+//
+//  &.small {
+//    padding: 8px 16px;
+//    font-size: 14px;
+//  }
+//
+//  &.large {
+//    padding: 16px 32px;
+//    font-size: 18px;
+//  }
+//
+//  &.danger {
+//    background-color: #dc3545;
+//
+//    &:hover {
+//      background-color: #c82333;
+//    }
+//  }
+//
+//  &.success {
+//    background-color: #28a745;
+//
+//    &:hover {
+//      background-color: #218838;
+//    }
+//  }
+//}
+//
+//@keyframes spin {
+//  0% {
+//    transform: rotate(0deg);
+//  }
+//
+//  100% {
+//    transform: rotate(360deg);
+//  }
+//}

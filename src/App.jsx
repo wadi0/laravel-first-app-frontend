@@ -31,15 +31,3 @@ function App() {
 }
 
 export default App;
-
-
-//   //   axios.get('http://127.0.0.1:8000/api/products')
-// //       {apiData.map((product) => (
-// //         <div key={product.id} className="product">
-// //           <h3>{product.name}</h3>
-// //           <img
-// //             src={`http://localhost:8000/storage/${product.image}`}
-// //             alt={product.name}
-// //             style={{ width: '200px', height: 'auto' }}
-// //           />
-// //         </div>

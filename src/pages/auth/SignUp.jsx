@@ -1,18 +1,19 @@
 import React, {useState} from 'react';
 import "./signin.scss";
-import flower_pic from "../../assets/feature-pic.png";
+import zawLogo from "../../assets/zawLogo.jpg";
 import logo from "../../assets/logo.png";
 import CustomInput from "../../components/customInput/CustomInput.jsx";
 import {Form, Formik} from "formik";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import AxiosServices from "../../components/network/AxiosServices.jsx";
 import ApiUrlServices from "../../components/network/ApiUrlServices.jsx";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import path from "../../routes/path.jsx";
 
 const SignUp = () => {
 
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const initialValues = {
         name: '',
@@ -37,14 +38,15 @@ const SignUp = () => {
     const handleSubmit = async (values, {resetForm}) => {
         setLoading(true);
         let payload = {
-            name : values.name,
-            email : values.email,
-            password : values.password
+            name: values.name,
+            email: values.email,
+            password: values.password
         }
         try {
             AxiosServices.post(ApiUrlServices.SIGN_UP, payload)
-                .then((res)=>{
+                .then((res) => {
                     console.log(res)
+                    navigate(path.login);
                 })
         } catch (error) {
             alert('Something went wrong');
@@ -55,35 +57,44 @@ const SignUp = () => {
 
     return (
         <div className="signIn_container">
-            <div className="card">
+            <div className="signin-card">
                 <div className="image">
-                    <img src={flower_pic}/>
+                    <img src={zawLogo} className='img'/>
                 </div>
-                <div className="content">
-                    <img src={logo}/>
-                    <h2>Sign In your account</h2>
+                <div className="signin-content">
+                    <h2 className="signin-title">Sign Up your account</h2>
                     <Formik
                         initialValues={initialValues}
                         validate={validate}
                         onSubmit={handleSubmit}
                     >
-                        <Form className="form">
-                            <div className="textbox">
+                        <Form className="signin-form">
+                            <div className="mb-3">
                                 <CustomInput
                                     name="name"
                                     label="Name"
                                     placeholder="Enter your name"
+                                    labelClassName="signin-label"
+                                    inputClassName="signin-input"
                                 />
+                            </div>
+                            <div className="mb-3">
                                 <CustomInput
                                     name="email"
                                     label="Email"
                                     placeholder="Enter your email"
+                                    labelClassName="signin-label"
+                                    inputClassName="signin-input"
                                 />
+                            </div>
+                            <div className="mb-3">
                                 <CustomInput
                                     name="password"
                                     label="Password"
                                     placeholder="Enter your password"
                                     type="password"
+                                    labelClassName="signin-label"
+                                    inputClassName="signin-input"
                                 />
                             </div>
                             <CustomSubmitButton
@@ -91,11 +102,14 @@ const SignUp = () => {
                                 // onClick={handleSubmit}
                                 type="submit"
                                 label="Sign Up"
+                                btnClassName="signin-btn"
                             />
                         </Form>
                     </Formik>
-                    <p>Already have an account?</p>
-                    <Link to={path.login}>Sign In</Link>
+                    <div className="forgot-pass-signup-link">
+                        <p className="already-account">Already have an account?</p>
+                        <Link to={path.login} className="signup-link">Sign In</Link>
+                    </div>
                 </div>
             </div>
         </div>
