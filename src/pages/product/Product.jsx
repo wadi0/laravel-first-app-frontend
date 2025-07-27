@@ -5,17 +5,33 @@ import "./product.scss";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import CustomModal from "../../components/custommodal/CustomModal.jsx";
 import AddProduct from "./AddProduct.jsx";
+import CustomSelect from "../../components/customselect/CustomSelect.jsx";
 
 const Product = () => {
 
     const [productList, setProductList] = useState([])
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [categoryList, setCategoryList] = useState([])
+    const [selectedCategory, setSelectedCategory] = useState('');
 
     const toggleModal = () => {
         setShowModal(!showModal);
     };
+    // get category
+    useEffect(() => {
+        AxiosServices.get(ApiUrlServices.All_CATEGORIES_LIST)
+            .then((res) => {
+                console.log(res.data)
+                setCategoryList(res.data)
+            }).catch((error) => {
 
+        }).finally(() => {
+
+        })
+    }, []);
+
+    // get all product
     useEffect(() => {
         gelAllProductList()
     }, []);
@@ -66,6 +82,18 @@ const Product = () => {
 
         <div className="product-wrapper">
             <div className="top-bar">
+                <CustomSelect
+                    name="category_id"
+                    label="Category"
+                    placeholder="Please select category"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    options={categoryList.map((item) => ({
+                        label: item.name.toUpperCase(),
+                        value: item.id,
+                    }))}
+                />
+
                 <CustomSubmitButton
                     // isLoading={loading}
                     onClick={toggleModal}
@@ -87,14 +115,14 @@ const Product = () => {
                         <h3 className="product-name">{product.description}</h3>
                         <h3 className="product-name">${product.price}</h3>
                         <CustomSubmitButton
-                                onClick={() => handleEdit(product)}
-                                type="button"
-                                label="Edit"
-                                btnClassName="edit-btn"
-                            />
+                            onClick={() => handleEdit(product)}
+                            type="button"
+                            label="Edit"
+                            btnClassName="edit-btn"
+                        />
                         <CustomSubmitButton
                             // isLoading={loading}
-                            onClick={()=> deleteProduct(product.id)}
+                            onClick={() => deleteProduct(product.id)}
                             type="submit"
                             label="Delete"
                         />
@@ -115,6 +143,7 @@ const Product = () => {
                         gelAllProductList();
                         toggleModal();
                     }}
+                    categoryList = {categoryList}
                 />
             </CustomModal>
         </div>

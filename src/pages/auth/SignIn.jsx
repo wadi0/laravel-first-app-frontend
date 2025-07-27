@@ -15,16 +15,9 @@ const SignIn = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // const optionsCountry = [
-    //     {label: "Bangladesh", value: "bd"},
-    //     {label: "India", value: "in"},
-    //     {label: "USA", value: "us"},
-    // ];
-
     const initialValues = {
         email: '',
         password: '',
-        // country: "",
     };
 
     const validate = (values) => {

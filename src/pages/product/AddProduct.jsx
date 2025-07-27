@@ -3,14 +3,22 @@ import {Formik, Form, Field, ErrorMessage, FieldArray} from 'formik';
 import {useNavigate} from 'react-router-dom';
 import AxiosServices from '../../components/network/AxiosServices.jsx';
 import ApiUrlServices from '../../components/network/ApiUrlServices.jsx';
-import CustomFileUpload from "../../components/customfileupload/CustomFileUpload.jsx";
 import CustomInput from "../../components/customInput/CustomInput.jsx";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
-import CustomFileUploadWithPreview from "../../components/customfileupload/CustomFileUpload.jsx";
 import path from "../../routes/path.jsx";
-import {FaUpload} from "react-icons/fa";
+import {FaCloudUploadAlt, FaUpload} from "react-icons/fa";
+import CustomSelect from "../../components/customselect/CustomSelect.jsx";
+import CustomFileUploadWithPreview from "../../components/customfileupload/CustomFileUpload.jsx";
 
-const AddProduct = ({product, onSuccess}) => {
+const AddProduct = ({product, onSuccess, categoryList}) => {
+
+    const optionsRole = [
+        {label: "Home", value: "home"},
+        {label: "Away", value: "away"},
+        {label: "Special", value: "special"},
+        {label: "Others", value: "others"},
+    ];
+
     const [loading, setLoading] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
     const navigate = useNavigate();
@@ -22,6 +30,7 @@ const AddProduct = ({product, onSuccess}) => {
         role: product?.role || '',
         team: product?.team || '',
         image: null,
+        category_id: product?.category_id || "",
         variants: [
             {color: '', size: '', stock: ''}
         ]
@@ -35,14 +44,33 @@ const AddProduct = ({product, onSuccess}) => {
 
     const validate = (values) => {
         const errors = {};
+        if (!values.category_id.trim()) errors.category_id = 'Please select category';
         if (!values.name.trim()) errors.name = 'Product name is required';
         if (!values.price.trim()) errors.price = 'Product price is required';
+        if (!values.team.trim()) errors.team = 'Team name is required';
+        if (!values.role.trim()) errors.role = 'Role is required';
         if (!values.description.trim()) errors.description = 'Description is required';
         if (!product && !values.image) errors.image = 'Image is required';
+        // Variants validation
+        const variantErrors = [];
+        values.variants.forEach((variant, index) => {
+            const variantError = {};
+            if (!variant.color.trim()) variantError.color = 'Color is required';
+            if (!variant.size.trim()) variantError.size = 'Size is required';
+            if (!variant.stock.toString().trim()) variantError.stock = 'Stock is required';
+            if (Object.keys(variantError).length > 0) {
+                variantErrors[index] = variantError;
+            }
+        });
+
+        if (variantErrors.length > 0) {
+            errors.variants = variantErrors;
+        }
         return errors;
     };
 
     const handleSubmit = async (values) => {
+        console.log(values)
         setLoading(true);
         const formData = new FormData();
         formData.append('name', values.name);
@@ -50,6 +78,7 @@ const AddProduct = ({product, onSuccess}) => {
         formData.append('description', values.description);
         formData.append('role', values.role);
         formData.append('team', values.team);
+        formData.append('category_id', values.category_id);
         if (values.image) {
             formData.append('image', values.image);
         }
@@ -116,6 +145,17 @@ const AddProduct = ({product, onSuccess}) => {
                     <Form encType="multipart/form-data">
                         <div className="textbox">
                             <div className="mb-3">
+                                <CustomSelect
+                                    name="category_id"
+                                    label="Category"
+                                    placeholder="Please select category"
+                                    options={categoryList.map((item) => ({
+                                        label: item.name.toUpperCase(),
+                                        value: item.id,
+                                    }))}
+                                />
+                            </div>
+                            <div className="mb-3">
                                 <CustomInput
                                     name="name"
                                     label="Product name"
@@ -136,43 +176,36 @@ const AddProduct = ({product, onSuccess}) => {
                                     placeholder="Enter team name"
                                 />
                             </div>
-                            {/* select tag use role ok*/}
                             <div className="mb-3">
-                                <CustomInput
+                                <CustomSelect
                                     name="role"
-                                    label="Role"
-                                    placeholder="Enter product role"
+                                    label="role"
+                                    placeholder="Please select role"
+                                    options={optionsRole.map((item) => ({
+                                        label: item.label.toUpperCase(),
+                                        value: item.value,
+                                    }))}
                                 />
                             </div>
 
                             <div className=" mb-3 mt-3">
-                                <label>Product Image</label>
-
-                                {previewImage && (
-                                    <div className="image-preview">
-                                        <img
-                                            src={previewImage}
-                                            alt="Preview"
-                                            style={{maxWidth: '200px', maxHeight: '200px'}}
-                                        />
-                                    </div>
-                                )}
-
-                                <label htmlFor="image-upload" style={{cursor: 'pointer', display: 'inline-block'}}>
-                                    <FaUpload size={24} color="#007bff"/>
-                                    <span style={{marginLeft: '8px'}}>Upload Image</span>
-                                </label>
-
-                                <input
-                                    id="image-upload"
-                                    type="file"
-                                    style={{display: 'none'}}
-                                    onChange={(event) => {
-                                        handleImageChange(setFieldValue, event.currentTarget.files[0]);
-                                    }}
+                                <CustomFileUploadWithPreview
+                                    name="image"
+                                    label="Product Image"
+                                    labelClassName="my-label-class mb-2"
+                                    className="my-custom-upload"
+                                    uploadText="Click to Upload"
+                                    accept="image/*"
+                                    previewWidth={250}
+                                    previewHeight={250}
+                                    cropperWidth={250}
+                                    cropperHeight={250}
+                                    icon={FaCloudUploadAlt}
+                                    multiple={false}
+                                    enableCrop={true}
+                                    aspect={1}
                                 />
-
-                                <ErrorMessage name="image" component="div" className="error-message"/>
+                                {/*<ErrorMessage name="image" component="div" className="error-message"/>*/}
                             </div>
 
 
@@ -193,14 +226,15 @@ const AddProduct = ({product, onSuccess}) => {
                                             const isFirst = index === 0;
                                             const suffix = isFirst ? '' : ` ${index}`;
                                             return (
-                                                <div key={index} className="variant-group">
-                                                    {/*style={{*/}
-                                                    {/*    marginBottom: '1.5rem',*/}
-                                                    {/*    border: '1px solid #ddd',*/}
-                                                    {/*    padding: '1rem',*/}
-                                                    {/*    borderRadius: '6px',*/}
-                                                    {/*    position: 'relative'*/}
-                                                    {/*}}*/}
+                                                <div key={index} className="variant-group"
+                                                     style={{
+                                                         marginBottom: '1.5rem',
+                                                         border: '1px solid #ddd',
+                                                         padding: '1rem',
+                                                         borderRadius: '6px',
+                                                         position: 'relative'
+                                                     }}
+                                                >
 
                                                     {/* Header row with title and buttons */}
                                                     <div style={{
