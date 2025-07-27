@@ -13,8 +13,8 @@ const CustomModal = ({isOpen, onClose, title, children, modalClass = "", size}) 
                     <CustomSubmitButton
                         // isLoading={loading}
                         onClick={onClose}
-                        type="submit"
-                        label="&times; Close"
+                        type="button"
+                        label="❌"
                         btnClassName="default-submit-btn danger"
                     />
                 </div>

@@ -8,6 +8,7 @@ import AxiosServices from "../../components/network/AxiosServices.jsx";
 import ApiUrlServices from "../../components/network/ApiUrlServices.jsx";
 import {Link, useNavigate} from "react-router-dom";
 import path from "../../routes/path.jsx";
+import {toast} from "react-toastify";
 
 const SignIn = () => {
 
@@ -48,10 +49,16 @@ const SignIn = () => {
             await AxiosServices.post(ApiUrlServices.LOG_IN, payload)
                 .then((res) => {
                     localStorage.setItem("user", JSON.stringify(res.data.result));
+                    resetForm()
                     navigate(path.home);
+                    toast.success("Sign In Successfully.")
                 })
         } catch (error) {
-            alert('Something went wrong');
+            if (error.response.data.msg === "User not found! Please sign up first.") {
+                toast.error('User not found! Please sign up first.');
+            } else {
+                toast.error('Something went wrong');
+            }
         } finally {
             setLoading(false);
         }
@@ -111,7 +118,7 @@ const SignIn = () => {
                         </Form>
                     </Formik>
                     <div className="forgot-pass-signup-link">
-                        <p className="forgot-password" style={{ cursor: "not-allowed" }}>Forgot your password?</p>
+                        <p className="forgot-password" style={{cursor: "not-allowed"}}>Forgot your password?</p>
                         <Link to={path.signup} className="signup-link">Sign Up</Link>
                     </div>
                 </div>

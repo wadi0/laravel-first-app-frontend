@@ -23,8 +23,8 @@ const Product = () => {
     const gelAllProductList = async () => {
         await AxiosServices.get(ApiUrlServices.ALL_PRODUCT_LIST)
             .then((res) => {
-                console.log(res.data)
-                setProductList(res.data)
+                console.log(res.data.data)
+                setProductList(res.data.data)
             }).catch((err) => {
                 console.log(err)
             }).finally(() => {
@@ -69,7 +69,7 @@ const Product = () => {
                 <CustomSubmitButton
                     // isLoading={loading}
                     onClick={toggleModal}
-                    type="submit"
+                    type="button"
                     label="+ Add Product"
                     btnClassName="default-submit-btn"
                 />

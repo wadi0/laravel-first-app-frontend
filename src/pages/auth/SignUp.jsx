@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import "./signin.scss";
 import zawLogo from "../../assets/zawLogo.jpg";
-import logo from "../../assets/logo.png";
 import CustomInput from "../../components/customInput/CustomInput.jsx";
 import {Form, Formik} from "formik";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
@@ -9,6 +8,7 @@ import AxiosServices from "../../components/network/AxiosServices.jsx";
 import ApiUrlServices from "../../components/network/ApiUrlServices.jsx";
 import {Link, useNavigate} from "react-router-dom";
 import path from "../../routes/path.jsx";
+import {toast} from "react-toastify";
 
 const SignUp = () => {
 
@@ -43,13 +43,20 @@ const SignUp = () => {
             password: values.password
         }
         try {
-            AxiosServices.post(ApiUrlServices.SIGN_UP, payload)
+            await AxiosServices.post(ApiUrlServices.SIGN_UP, payload)
                 .then((res) => {
-                    console.log(res)
+                    resetForm();
                     navigate(path.login);
+                    toast.success("Sign Up Successfully.")
                 })
         } catch (error) {
-            alert('Something went wrong');
+            const emailError = error?.response?.data?.msg?.email;
+            if (emailError?.length) {
+                toast.error(emailError[0]);
+            } else {
+                toast.error("Something went wrong.");
+            }
+
         } finally {
             setLoading(false);
         }
