@@ -7,6 +7,8 @@ import {
   FaTimes,
   FaChevronDown,
   FaBars,
+  FaHome,
+  FaStore,
 } from 'react-icons/fa';
 import './navbar.scss';
 import logo from '../../assets/logo.png';
@@ -16,6 +18,7 @@ const Navbar = () => {
   const [searchActive, setSearchActive] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [activeBottomTab, setActiveBottomTab] = useState('home');
 
   const menuItems = [
     { name: 'Home' },
@@ -27,9 +30,26 @@ const Navbar = () => {
     { name: 'Contact' },
   ];
 
+  const bottomNavItems = [
+    { id: 'home', icon: FaHome, label: 'Home' },
+    { id: 'shop', icon: FaStore, label: 'Shop' },
+    { id: 'search', icon: FaSearch, label: 'Search' },
+    { id: 'cart', icon: FaShoppingCart, label: 'Cart' },
+    { id: 'wishlist', icon: FaHeart, label: 'Wishlist' },
+  ];
+
   const handleSearch = () => {
     console.log('Search for:', searchText);
     // এখানে তোমার search logic দিতে পারো
+  };
+
+  const handleBottomNavClick = (tabId) => {
+    setActiveBottomTab(tabId);
+    if (tabId === 'search') {
+      setSearchActive(true);
+    }
+    // এখানে navigation logic add করতে পারো
+    console.log('Bottom nav clicked:', tabId);
   };
 
   return (
@@ -111,6 +131,23 @@ const Navbar = () => {
           )}
         </div>
       </header>
+
+      {/* Bottom Navigation for Mobile */}
+      <div className="bottom-navigation">
+        {bottomNavItems.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <div
+              key={item.id}
+              className={`bottom-nav-item ${activeBottomTab === item.id ? 'active' : ''}`}
+              onClick={() => handleBottomNavClick(item.id)}
+            >
+              <IconComponent className="bottom-nav-icon" />
+              <span className="bottom-nav-label">{item.label}</span>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Mobile Sidebar Overlay */}
       {mobileSidebarOpen && (

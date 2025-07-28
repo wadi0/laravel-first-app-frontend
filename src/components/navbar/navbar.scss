@@ -1,13 +1,70 @@
+/* MainLayout.css - এই CSS টা তোমার main CSS file এ add করো */
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Main Layout */
+.main-layout {
+  margin-top: 60px; /* Navbar এর height */
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.footer {
+  text-align: center;
+  padding: 15px;
+  background: #f0f0f0;
+  margin-top: auto;
+}
+
+/* Mobile এর জন্য */
+@media (max-width: 900px) {
+  .main-layout {
+    margin-top: 60px; /* Same height রাখো */
+    margin-bottom: 70px; /* Bottom navigation এর জন্য space */
+    min-height: calc(100vh - 130px); /* Top navbar + bottom nav */
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+
+  .footer {
+    margin-bottom: 0; /* Bottom nav এর উপরে থাকবে */
+  }
+}
+
+/* Navbar CSS */
 .navbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 60px;
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  background-color: white;
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  transition: all 0.3s ease;
+  padding: 0 20px;
+  z-index: 9999 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #eee;
 
   &.blurred {
     filter: blur(4px);
@@ -21,53 +78,83 @@
 
     .mobile-toggle {
       display: none;
-      font-size: 20px;
+      font-size: 24px;
       cursor: pointer;
-      margin-right: 10px;
+      margin-right: 15px;
+      color: #333;
+
+      @media (max-width: 900px) {
+        display: block;
+      }
     }
 
     .logo {
       img {
         height: 40px;
+        width: auto;
       }
     }
   }
 
   .navbar-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+    @media (max-width: 900px) {
+      display: none;
+    }
+
     ul.menu {
       display: flex;
       list-style: none;
-      gap: 20px;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
 
       .menu-item {
         position: relative;
         cursor: pointer;
+        padding: 15px 0;
+        color: #333;
+        font-weight: 500;
+
+        &:hover {
+          color: #007bff;
+        }
 
         .arrow {
-          margin-left: 5px;
+          margin-left: 8px;
+          font-size: 12px;
         }
 
         .dropdown {
           position: absolute;
           top: 100%;
-          left: 0;
+          left: 50%;
+          transform: translateX(-50%);
           background: white;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
           list-style: none;
           padding: 10px 0;
-          z-index: 10;
+          z-index: 10000;
+          border-radius: 8px;
+          min-width: 200px;
+          border: 1px solid #eee;
 
           li {
-            padding: 5px 20px;
-            white-space: nowrap;
+            padding: 0;
 
             a {
               color: #333;
               text-decoration: none;
               display: block;
+              padding: 12px 20px;
+              transition: all 0.3s ease;
 
               &:hover {
-                background-color: #f0f0f0;
+                background-color: #f8f9fa;
+                color: #007bff;
               }
             }
           }
@@ -79,11 +166,17 @@
   .navbar-right {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
 
     .icon {
       cursor: pointer;
-      font-size: 18px;
+      font-size: 30px;
+      color: #333;
+      padding: 8px;
+
+      &:hover {
+        color: #007bff;
+      }
     }
 
     .desktop-only {
@@ -95,11 +188,21 @@
     .search-box {
       display: flex;
       align-items: center;
+      background: #f8f9fa;
+      border-radius: 25px;
+      padding: 8px 15px;
 
       input {
-        padding: 6px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 8px 15px;
+        border: none;
+        background: transparent;
+        outline: none;
+        width: 300px;
+        font-size: 14px;
+
+        @media (max-width: 900px) {
+          width: 200px;
+        }
       }
 
       .search-btn,
@@ -107,32 +210,27 @@
         background: none;
         border: none;
         font-size: 18px;
-        margin-left: 5px;
+        margin-left: 10px;
         cursor: pointer;
+        color: #666;
+
+        &:hover {
+          color: #007bff;
+        }
       }
     }
   }
 
+  /* Mobile Layout */
   @media (max-width: 900px) {
-    .navbar-center {
-      display: none;
-    }
-
     .navbar-left {
       flex: 1;
       justify-content: center;
       position: relative;
 
-      .logo {
-        img {
-          height: 40px;
-        }
-      }
-
       .mobile-toggle {
         position: absolute;
-        left: 20px;
-        display: block;
+        left: 0;
       }
     }
 
@@ -143,42 +241,111 @@
   }
 }
 
-// Sidebar Styles
+/* Bottom Navigation - Mobile Only */
+.bottom-navigation {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 70px;
+  background-color: #ffffff;
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: 9998 !important;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid #eee;
+
+  /* Show only on mobile screens */
+  @media (max-width: 900px) {
+    display: flex;
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 60px;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.active {
+      .bottom-nav-icon {
+        color: #007bff;
+        transform: scale(1.1);
+      }
+
+      .bottom-nav-label {
+        color: #007bff;
+        font-weight: 600;
+      }
+    }
+
+    .bottom-nav-icon {
+      font-size: 20px;
+      color: #666;
+      margin-bottom: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .bottom-nav-label {
+      font-size: 11px;
+      color: #666;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+  }
+}
+
+/* Sidebar Styles */
 .sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
-  z-index: 1000;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 99999 !important;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
 
   .mobile-sidebar {
-    width: 250px;
+    width: 280px;
     background: white;
     height: 100%;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-    position: relative;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
     overflow-y: auto;
 
     .sidebar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      background: #f8f9fa;
 
       .logo img {
-        height: 30px;
+        height: 35px;
       }
 
       .close-btn {
-        font-size: 20px;
+        font-size: 24px;
         cursor: pointer;
+        color: #333;
+
+        &:hover {
+          color: #007bff;
+        }
       }
     }
 
@@ -187,25 +354,46 @@
       padding: 0;
 
       li {
-        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 15px 20px;
+        cursor: pointer;
+        color: #333;
+        font-weight: 500;
+
+        &:hover {
+          background-color: #f8f9fa;
+          color: #007bff;
+        }
 
         .dropdown {
-          padding-left: 15px;
+          background: #f8f9fa;
+          margin-top: 10px;
+          padding-left: 20px;
 
           li {
-            padding: 5px 0;
+            padding: 10px 0;
+            border: none;
+            font-weight: normal;
+            font-size: 14px;
 
             a {
-              color: #333;
+              color: #666;
               text-decoration: none;
 
               &:hover {
-                text-decoration: underline;
+                color: #007bff;
               }
             }
           }
         }
       }
     }
+  }
+}
+
+/* Ensure content doesn't overlap with bottom navigation */
+@media (max-width: 900px) {
+  body {
+    padding-bottom: 70px; /* Same as bottom navigation height */
   }
 }
