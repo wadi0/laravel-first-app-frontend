@@ -11,7 +11,7 @@ import {
   FaStore,
 } from 'react-icons/fa';
 import './navbar.scss';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/my_logo.png';
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -52,9 +52,16 @@ const Navbar = () => {
     console.log('Bottom nav clicked:', tabId);
   };
 
+  const handleSearchClose = () => {
+    setSearchActive(false);
+    setSearchText('');
+    setActiveBottomTab('home'); // Reset to home when closing search
+  };
+
   return (
     <>
-      <header className={`navbar ${searchActive ? 'search-active' : ''} ${mobileSidebarOpen ? 'blurred' : ''}`}>
+      <header  className="navbar-main">
+        <div className={`navbar-container ${searchActive ? 'search-active' : ''} ${mobileSidebarOpen ? 'blurred' : ''}`}>
         <div className="navbar-left">
           {/* Mobile toggle icon */}
           <div className="mobile-toggle" onClick={() => setMobileSidebarOpen(true)}>
@@ -103,10 +110,10 @@ const Navbar = () => {
               <FaShoppingCart className="icon desktop-only" />
             </>
           ) : (
-            <div className="search-box desktop-only">
+            <div className="search-box">
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search products..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 onKeyDown={(e) => {
@@ -114,21 +121,20 @@ const Navbar = () => {
                     handleSearch();
                   }
                 }}
+                autoFocus
               />
               <button className="search-btn" onClick={handleSearch}>
                 <FaSearch />
               </button>
               <button
                 className="close-btn"
-                onClick={() => {
-                  setSearchActive(false);
-                  setSearchText('');
-                }}
+                onClick={handleSearchClose}
               >
                 <FaTimes />
               </button>
             </div>
           )}
+        </div>
         </div>
       </header>
 

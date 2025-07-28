@@ -30,6 +30,17 @@
     --color-box-shadow-dark: rgba(0, 0, 0, 0.15)
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
 a {
     font-weight: 500;
     color: #646cff;
@@ -40,12 +51,12 @@ a {
 /*  color: #535bf2;*/
 /*}*/
 
-body {
-    /*padding-top: 60px;*/
-    margin: 0;
-    background: var(--color-background);
-    color: var(--color-text);
-}
+/*body {*/
+/*    !*padding-top: 60px;*!*/
+/*    margin: 0;*/
+/*    background: var(--color-background);*/
+/*    color: var(--color-text);*/
+/*}*/
 
 h1, h2, h3, h4, h5, h6, p {
     margin: 0 !important;
