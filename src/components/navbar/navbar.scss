@@ -205,6 +205,11 @@ $transition: all 0.3s ease;
       white-space: nowrap;
       @include hover-effect;
 
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
       .arrow {
         margin-left: 8px;
         font-size: 12px;
@@ -254,8 +259,13 @@ $transition: all 0.3s ease;
   .icon {
     cursor: pointer;
     color: $text-color;
-    font-size: 18px;
+    font-size: 24px;
+    line-height: 1;
+    height: 20px;
+    width: 20px;
+    @include flex-center; // ensure it's centered inside square
     @include hover-effect;
+
 
     @include mobile {
       font-size: 24px;
@@ -329,8 +339,9 @@ $transition: all 0.3s ease;
   }
 
   @include mobile {
-    position: absolute;
-    right: 20px;
+    //position: absolute;
+    //right: 20px;
+    gap: 0;
     transition: $transition;
   }
 }
@@ -418,6 +429,11 @@ $transition: all 0.3s ease;
     height: 100%;
     box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
     overflow-y: auto;
+
+    ul li a {
+      text-decoration: none;
+      color: inherit;
+    }
 
     .sidebar-header {
       display: flex;
