@@ -20,5 +20,8 @@ const ApiUrlServices = {
     ALL_WISHLIST_LIST: "wishlist",
     ADD_WISHLIST: "wishlist",
     DELETE_WISHLIST: (id) => `/wishlist/${id}`,
+    // collection api
+    All_COLLECTION: "collections",
+    TITLE_COLLECTION: (slug) => `collections/${slug}`
 }
 export default ApiUrlServices

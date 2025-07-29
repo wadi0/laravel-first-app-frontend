@@ -1,27 +1,21 @@
-// MainLayout.jsx - এইটা ব্যবহার করো
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import {Outlet} from 'react-router-dom';
 import Navbar from '../navbar/Navbar.jsx';
+import Footer from "../footer/Footer.jsx";
 
 const MainLayout = () => {
-  return (
-    <>
-      {/* Fixed Navbar */}
-      <Navbar />
+    return (
+        <>
+            <Navbar/>
 
-      {/* Main Content */}
-      <div className="main-layout">
-        <main className="main-content">
-          <Outlet />
-        </main>
-
-        {/* Footer */}
-        <footer className="footer">
-          <p>© 2025 Wadi</p>
-        </footer>
-      </div>
-    </>
-  );
+            <div className="main-layout">
+                <main className="main-content">
+                    <Outlet/>
+                </main>
+                <Footer/>
+            </div>
+        </>
+    );
 };
 
 export default MainLayout;
