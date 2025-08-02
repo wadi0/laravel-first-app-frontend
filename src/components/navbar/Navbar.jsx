@@ -22,6 +22,10 @@ const Navbar = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeBottomTab, setActiveBottomTab] = useState('home');
 
+  // Cart and Wishlist count states - you can connect these to your state management
+  const [cartCount, setCartCount] = useState(3); // Example: 3 items in cart
+  const [wishlistCount, setWishlistCount] = useState(5); // Example: 5 items in wishlist
+
   const navigate = useNavigate();
 
   const menuItems = [
@@ -54,8 +58,8 @@ const Navbar = () => {
     { id: 'home', icon: FaHome, label: 'Home' },
     { id: 'product', icon: FaStore, label: 'Product' }, // renamed from shop
     { id: 'search', icon: FaSearch, label: 'Search' },
-    { id: 'cart', icon: FaShoppingCart, label: 'Cart' },
-    { id: 'wishlist', icon: FaHeart, label: 'Wishlist' },
+    { id: 'cart', icon: FaShoppingCart, label: 'Cart', count: cartCount },
+    { id: 'wishlist', icon: FaHeart, label: 'Wishlist', count: wishlistCount },
   ];
 
   const handleSearch = () => {
@@ -78,6 +82,14 @@ const Navbar = () => {
     setSearchText('');
     setActiveBottomTab('home');
   };
+
+  // Icon with badge component
+  const IconWithBadge = ({ icon: Icon, count, className, ...props }) => (
+    <div className="icon-with-badge" {...props}>
+      <Icon className={className} />
+      {count > 0 && <span className="badge-counter">{count > 99 ? '99+' : count}</span>}
+    </div>
+  );
 
   return (
     <>
@@ -129,8 +141,20 @@ const Navbar = () => {
               <>
                 <FaSearch className="icon desktop-only" onClick={() => setSearchActive(true)} />
                 <FaUserCircle className="icon" />
-                <Link to={path.wishlist}><FaHeart className="icon desktop-only" /></Link>
-                <Link to={path.cart}><FaShoppingCart className="icon desktop-only" /></Link>
+                <Link to={path.wishlist} className="desktop-only">
+                  <IconWithBadge
+                    icon={FaHeart}
+                    count={wishlistCount}
+                    className="icon"
+                  />
+                </Link>
+                <Link to={path.cart} className="desktop-only">
+                  <IconWithBadge
+                    icon={FaShoppingCart}
+                    count={cartCount}
+                    className="icon"
+                  />
+                </Link>
               </>
             ) : (
               <div className="search-box">
@@ -166,7 +190,16 @@ const Navbar = () => {
               className={`bottom-nav-item ${activeBottomTab === item.id ? 'active' : ''}`}
               onClick={() => handleBottomNavClick(item.id)}
             >
-              <IconComponent className="bottom-nav-icon" />
+              {item.count !== undefined ? (
+                <div className="icon-with-badge">
+                  <IconComponent className="bottom-nav-icon" />
+                  {item.count > 0 && (
+                    <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>
+                  )}
+                </div>
+              ) : (
+                <IconComponent className="bottom-nav-icon" />
+              )}
               <span className="bottom-nav-label">{item.label}</span>
             </div>
           );

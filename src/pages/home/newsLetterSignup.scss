@@ -1,0 +1,426 @@
+.newsletter-signup {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 60px 20px;
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  &.success {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  }
+
+  .newsletter-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .newsletter-content {
+    .newsletter-header {
+      text-align: center;
+      margin-bottom: 40px;
+
+      h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+
+        @media (max-width: 768px) {
+          font-size: 2rem;
+        }
+      }
+
+      p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+
+        @media (max-width: 768px) {
+          font-size: 1rem;
+        }
+      }
+    }
+
+    .newsletter-benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-bottom: 50px;
+
+      .benefit-card {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 25px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-5px);
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .benefit-icon {
+          font-size: 2.5rem;
+          margin-bottom: 15px;
+          display: block;
+        }
+
+        .benefit-info {
+          h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+          }
+
+          p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin: 0;
+            line-height: 1.4;
+          }
+        }
+      }
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    .newsletter-form-section {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 40px;
+
+      .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+
+        h3 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          margin-bottom: 30px;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .newsletter-form {
+          .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+
+            .email-input {
+              flex: 1;
+              padding: 15px 20px;
+              border: 2px solid rgba(255, 255, 255, 0.3);
+              border-radius: 25px;
+              background: rgba(255, 255, 255, 0.9);
+              color: #333;
+              font-size: 1rem;
+              transition: all 0.3s ease;
+
+              &::placeholder {
+                color: #666;
+              }
+
+              &:focus {
+                outline: none;
+                border-color: rgba(255, 255, 255, 0.8);
+                background: white;
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+              }
+
+              &.error {
+                border-color: #ff6b6b;
+                background: #ffebee;
+              }
+            }
+
+            .subscribe-btn {
+              padding: 15px 30px;
+              background: rgba(255, 255, 255, 0.2);
+              border: 2px solid rgba(255, 255, 255, 0.8);
+              border-radius: 25px;
+              color: white;
+              font-size: 1rem;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              min-width: 120px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              &:hover:not(:disabled) {
+                background: white;
+                color: #667eea;
+                transform: translateY(-2px);
+              }
+
+              &:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+              }
+
+              &.loading {
+                pointer-events: none;
+              }
+
+              .loading-spinner {
+                width: 20px;
+                height: 20px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top: 2px solid white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+              }
+            }
+
+            @media (max-width: 640px) {
+              flex-direction: column;
+              gap: 15px;
+
+              .email-input,
+              .subscribe-btn {
+                width: 100%;
+              }
+            }
+          }
+
+          .error-message {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            padding: 10px 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+
+            .error-icon {
+              font-size: 1rem;
+            }
+          }
+        }
+
+        .newsletter-trust {
+          margin-top: 30px;
+
+          .trust-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+
+            .trust-item {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 0.9rem;
+              opacity: 0.9;
+
+              .trust-icon {
+                font-size: 1.1rem;
+              }
+            }
+          }
+
+          .privacy-text {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+
+    .social-section {
+      text-align: center;
+
+      h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+      }
+
+      .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+
+        .social-link {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 20px;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 25px;
+          color: white;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+          }
+
+          .social-icon {
+            font-size: 1.2rem;
+          }
+
+          span:last-child {
+            font-size: 0.95rem;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+
+  // Success state
+  .success-content {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: bounce 0.6s ease-in-out;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .success-benefits {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+
+      .benefit-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 1rem;
+
+        .benefit-icon {
+          font-size: 1.2rem;
+        }
+      }
+    }
+
+    .continue-shopping-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 25px;
+      color: white;
+      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: white;
+        color: #4ecdc4;
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .newsletter-signup {
+    padding: 40px 15px;
+
+    .newsletter-content {
+      .newsletter-form-section {
+        padding: 25px 20px;
+      }
+
+      .social-section {
+        .social-links {
+          gap: 15px;
+
+          .social-link {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+  }
+}

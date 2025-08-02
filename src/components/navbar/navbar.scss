@@ -49,7 +49,6 @@ $transition: all 0.3s ease;
   flex-direction: column;
 
   @include mobile {
-    //margin-bottom: $bottom-nav-height;
     min-height: calc(100vh - 150px);
   }
 }
@@ -150,14 +149,25 @@ $transition: all 0.3s ease;
 
   .mobile-toggle {
     display: none;
-    font-size: 24px;
+    font-size: 22px;
     cursor: pointer;
     color: $text-color;
+    transition: $transition;
+
+    &:hover {
+      color: $primary-color;
+    }
 
     @include mobile {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: absolute;
-      left: 0;
+      left: 0px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
     }
   }
 
@@ -167,7 +177,7 @@ $transition: all 0.3s ease;
       width: auto;
 
       @include mobile {
-        height: 50px;
+        height: 45px;
       }
     }
   }
@@ -259,22 +269,66 @@ $transition: all 0.3s ease;
   .icon {
     cursor: pointer;
     color: $text-color;
-    font-size: 24px;
+    font-size: 20px;
     line-height: 1;
-    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 20px;
-    @include flex-center; // ensure it's centered inside square
+    height: 20px;
     @include hover-effect;
 
+    @include mobile {
+      font-size: 22px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  // Icon with badge wrapper
+  .icon-with-badge {
+    position: relative;
+    cursor: pointer;
+    color: $text-color;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    @include hover-effect;
 
     @include mobile {
-      font-size: 24px;
+      font-size: 22px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .badge-counter {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #dc3545;
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      line-height: 1;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      z-index: 1;
     }
   }
 
   .desktop-only {
     @include mobile {
-      display: none;
+      display: none !important;
     }
   }
 
@@ -311,7 +365,7 @@ $transition: all 0.3s ease;
     .close-btn {
       background: none;
       border: none;
-      font-size: 20px;
+      font-size: 18px;
       margin-left: 15px;
       cursor: pointer;
       color: #666;
@@ -319,8 +373,8 @@ $transition: all 0.3s ease;
       border-radius: 50%;
       transition: $transition;
       @include flex-center;
-      min-width: 40px;
-      height: 40px;
+      min-width: 36px;
+      height: 36px;
 
       &:hover {
         color: $primary-color;
@@ -339,9 +393,11 @@ $transition: all 0.3s ease;
   }
 
   @include mobile {
-    //position: absolute;
-    //right: 20px;
-    gap: 0;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    gap: 15px;
     transition: $transition;
   }
 }
@@ -377,6 +433,7 @@ $transition: all 0.3s ease;
     border-radius: 8px;
     transition: $transition;
     min-width: 60px;
+    position: relative;
 
     &:hover {
       background-color: lightgray;
@@ -407,6 +464,34 @@ $transition: all 0.3s ease;
       font-weight: 500;
       text-align: center;
       transition: $transition;
+    }
+
+    // Badge counter for bottom navigation
+    .icon-with-badge {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .badge-counter {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background-color: #dc3545;
+        color: white;
+        font-size: 9px;
+        font-weight: 600;
+        min-width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 3px;
+        line-height: 1;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+      }
     }
   }
 }
@@ -448,10 +533,14 @@ $transition: all 0.3s ease;
       }
 
       .close-btn {
-        font-size: 24px;
+        font-size: 20px;
         cursor: pointer;
         color: $text-color;
-        @include hover-effect;
+        transition: $transition;
+
+        &:hover {
+          color: $primary-color;
+        }
       }
     }
 
