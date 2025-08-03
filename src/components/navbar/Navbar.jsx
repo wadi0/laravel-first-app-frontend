@@ -8,7 +8,7 @@ import {
   FaChevronDown,
   FaBars,
   FaHome,
-  FaStore,
+  FaBox, // Product icon instead of FaStore
   FaUser,
   FaCog,
   FaSignOutAlt,
@@ -84,7 +84,7 @@ const Navbar = () => {
 
   const bottomNavItems = [
     { id: 'home', icon: FaHome, label: 'Home' },
-    { id: 'product', icon: FaStore, label: 'Product' }, // renamed from shop
+    { id: 'product', icon: FaBox, label: 'Product' }, // Changed from FaStore to FaBox (product icon)
     { id: 'search', icon: searchActive ? FaTimes : FaSearch, label: 'Search' }, // Dynamic icon
     { id: 'cart', icon: FaShoppingCart, label: 'Cart', count: cartCount },
     { id: 'wishlist', icon: FaHeart, label: 'Wishlist', count: wishlistCount },
@@ -282,34 +282,68 @@ const Navbar = () => {
       </header>
 
       {/* Bottom Navigation */}
-      <div className="bottom-navigation">
-        {bottomNavItems.map((item) => {
-          const IconComponent = item.icon;
-          return (
-            <div
-              key={item.id}
-              className={`bottom-nav-item ${
-                item.id === 'search' 
-                  ? (searchActive ? 'active' : '') 
-                  : (activeBottomTab === item.id ? 'active' : '')
-              }`}
-              onClick={() => handleBottomNavClick(item.id)}
-            >
-              {item.count !== undefined ? (
-                <div className="icon-with-badge">
-                  <IconComponent className="bottom-nav-icon" />
-                  {item.count > 0 && (
-                    <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>
-                  )}
-                </div>
-              ) : (
-                <IconComponent className="bottom-nav-icon" />
-              )}
-              <span className="bottom-nav-label">{item.label}</span>
-            </div>
-          );
-        })}
+      {/*<div className="bottom-navigation">*/}
+      {/*  {bottomNavItems.map((item) => {*/}
+      {/*    const IconComponent = item.icon;*/}
+      {/*    return (*/}
+      {/*      <div*/}
+      {/*        key={item.id}*/}
+      {/*        className={`bottom-nav-item ${*/}
+      {/*          item.id === 'search' */}
+      {/*            ? (searchActive ? 'active' : '') */}
+      {/*            : (activeBottomTab === item.id ? 'active' : '')*/}
+      {/*        }`}*/}
+      {/*        onClick={() => handleBottomNavClick(item.id)}*/}
+      {/*      >*/}
+      {/*        {item.count !== undefined ? (*/}
+      {/*          <div className="icon-with-badge">*/}
+      {/*            <IconComponent className="bottom-nav-icon" />*/}
+      {/*            {item.count > 0 && (*/}
+      {/*              <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>*/}
+      {/*            )}*/}
+      {/*          </div>*/}
+      {/*        ) : (*/}
+      {/*          <IconComponent className="bottom-nav-icon" />*/}
+      {/*        )}*/}
+      {/*        <span className="bottom-nav-label">{item.label}</span>*/}
+      {/*      </div>*/}
+      {/*    );*/}
+      {/*  })}*/}
+      {/*</div>*/}
+      // Bottom Navigation section এর জন্য updated code:
+
+{/* Bottom Navigation */}
+<div className="bottom-navigation">
+  {bottomNavItems.map((item) => {
+    const IconComponent = item.icon;
+    const isSearchClose = item.id === 'search' && searchActive;
+
+    return (
+      <div
+        key={item.id}
+        className={`bottom-nav-item ${
+          item.id === 'search' 
+            ? (searchActive ? 'active' : '') 
+            : (activeBottomTab === item.id ? 'active' : '')
+        }`}
+        data-search-close={isSearchClose} // এই line টা add করুন
+        onClick={() => handleBottomNavClick(item.id)}
+      >
+        {item.count !== undefined ? (
+          <div className="icon-with-badge">
+            <IconComponent className="bottom-nav-icon" />
+            {item.count > 0 && (
+              <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>
+            )}
+          </div>
+        ) : (
+          <IconComponent className="bottom-nav-icon" />
+        )}
+        <span className="bottom-nav-label">{item.label}</span>
       </div>
+    );
+  })}
+</div>
 
       {/* Mobile Sidebar */}
       {mobileSidebarOpen && (
