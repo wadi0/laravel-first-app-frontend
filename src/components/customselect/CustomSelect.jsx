@@ -1,5 +1,6 @@
 import React from "react";
 import {ErrorMessage, useField, useFormikContext} from "formik";
+import "./customselect.scss"
 
 const CustomSelect = ({ label, options, placeholder = "-- Select --", name, value, onChange }) => {
   const formikContext = useFormikContext();

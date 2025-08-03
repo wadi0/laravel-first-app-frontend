@@ -1,5 +1,7 @@
 .product-wrapper {
   padding: 20px;
+  max-width: 1220px;
+  margin: 0 auto;
 }
 
 .top-bar {
@@ -63,7 +65,6 @@
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
-  padding: 20px;
 
   @media (max-width: 768px) {
     justify-content: center;
