@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import AxiosServices from "../../components/network/AxiosServices.jsx";
 import ApiUrlServices from "../../components/network/ApiUrlServices.jsx";
 import "./product.scss";
@@ -6,6 +6,7 @@ import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import CustomModal from "../../components/custommodal/CustomModal.jsx";
 import AddProduct from "./AddProduct.jsx";
 import CustomSelect from "../../components/customselect/CustomSelect.jsx";
+import ProductCard from "./ProductCard.jsx";
 
 const Product = () => {
     const [productList, setProductList] = useState([]);
@@ -19,31 +20,26 @@ const Product = () => {
     const toggleModal = () => {
         setShowModal(!showModal);
         if (showModal) {
-            setEditingProduct(null); // Reset editing product when closing modal
+            setEditingProduct(null);
         }
     };
 
-    // Get categories
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const res = await AxiosServices.get(ApiUrlServices.All_CATEGORIES_LIST);
-                console.log(res.data);
                 setCategoryList(res.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
             }
         };
-
         fetchCategories();
     }, []);
 
-    // Get all products
     useEffect(() => {
         getAllProductList();
     }, []);
 
-    // Filter products when category changes
     useEffect(() => {
         if (selectedCategory === '') {
             setFilteredProducts(productList);
@@ -59,7 +55,6 @@ const Product = () => {
         setLoading(true);
         try {
             const res = await AxiosServices.get(ApiUrlServices.ALL_PRODUCT_LIST);
-            console.log(res.data.data);
             setProductList(res.data.data);
         } catch (err) {
             console.error('Error fetching products:', err);
@@ -69,10 +64,7 @@ const Product = () => {
     };
 
     const deleteProduct = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this product?')) {
-            return;
-        }
-
+        if (!window.confirm('Are you sure you want to delete this product?')) return;
         try {
             await AxiosServices.delete(ApiUrlServices.DELETE_PRODUCT(id));
             getAllProductList();
@@ -104,12 +96,14 @@ const Product = () => {
         <div className="product-wrapper">
             <div className="top-bar">
                 <CustomSelect
+                    id="category-filter-select"
                     name="category_id"
                     label="Filter by Category"
                     placeholder="Please select category"
                     value={selectedCategory}
                     onChange={handleCategoryChange}
                     options={categoryOptions}
+                    disabled={false}
                 />
 
                 <CustomSubmitButton
@@ -133,35 +127,12 @@ const Product = () => {
                         </div>
                     ) : (
                         filteredProducts.map((product) => (
-                            <div key={product.id} className="product">
-                                <img
-                                    src={`http://localhost:8000/storage/${product.image}`}
-                                    alt={product.name}
-                                    className="product-img"
-                                    onError={(e) => {
-                                        e.target.src = '/placeholder-image.png'; // Fallback image
-                                    }}
-                                />
-                                <div className="product-info">
-                                    <h3 className="product-name">{product.name}</h3>
-                                    <p className="product-description">{product.description}</p>
-                                    <p className="product-price">${product.price}</p>
-                                </div>
-                                <div className="product-actions">
-                                    <CustomSubmitButton
-                                        onClick={() => handleEdit(product)}
-                                        type="button"
-                                        label="Edit"
-                                        btnClassName="edit-btn"
-                                    />
-                                    <CustomSubmitButton
-                                        onClick={() => deleteProduct(product.id)}
-                                        type="button"
-                                        label="Delete"
-                                        btnClassName="delete-btn"
-                                    />
-                                </div>
-                            </div>
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                onEdit={handleEdit}
+                                onDelete={deleteProduct}
+                            />
                         ))
                     )}
                 </div>
