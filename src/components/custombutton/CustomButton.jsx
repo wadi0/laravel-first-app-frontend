@@ -9,15 +9,19 @@ const CustomSubmitButton = (props) => {
     }
   };
 
+    const isDefault = !props.btnClassName || props.btnClassName.includes('default-submit');
+
   return (
     <button
       type={props.type || "button"}
       onClick={handleClick}
       disabled={props.isLoading}
-      className={`default-submit-btn ${props.btnClassName || ''}`}
+            className={`${isDefault ? "default-submit-btn" : ""} ${props.btnClassName || ''}`}
+      // className={`default-submit-btn ${props.btnClassName || ''}`}
     >
       <div className="btn-content">
         {props.isLoading && <div className="spinner" />}
+        {props.icon ? props.icon : null}
         <span>{props.label}</span>
       </div>
     </button>

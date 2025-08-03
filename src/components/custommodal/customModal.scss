@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  z-index: 999;
+  z-index: 1000;
 }
 
 
@@ -33,6 +33,19 @@
     font-weight: bold;
   }
 }
+
+.close-modal-btn {
+  background-color: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: 40px;
+  cursor: pointer;
+
+  &:hover {
+    color: red;
+  }
+}
+
 
 .custom-modal-body {
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import "./customModal.scss";
 import CustomSubmitButton from "../custombutton/CustomButton.jsx";
+import {IoIosCloseCircleOutline} from "react-icons/io";
 
 const CustomModal = ({isOpen, onClose, title, children, modalClass = "", size}) => {
     if (!isOpen) return null;
@@ -14,8 +15,8 @@ const CustomModal = ({isOpen, onClose, title, children, modalClass = "", size}) 
                         // isLoading={loading}
                         onClick={onClose}
                         type="button"
-                        label="❌"
-                        btnClassName="default-submit-btn danger"
+                        icon = {<IoIosCloseCircleOutline />}
+                        btnClassName="close-modal-btn"
                     />
                 </div>
                 <div className="custom-modal-body">
