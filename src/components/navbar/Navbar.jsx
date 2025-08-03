@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FaUserCircle,
   FaHeart,
@@ -9,6 +9,11 @@ import {
   FaBars,
   FaHome,
   FaStore,
+  FaUser,
+  FaCog,
+  FaSignOutAlt,
+  FaClipboardList,
+  FaQuestionCircle,
 } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import './navbar.scss';
@@ -21,12 +26,35 @@ const Navbar = () => {
   const [searchText, setSearchText] = useState('');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeBottomTab, setActiveBottomTab] = useState('home');
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const userDropdownRef = useRef(null);
 
   // Cart and Wishlist count states - you can connect these to your state management
   const [cartCount, setCartCount] = useState(3); // Example: 3 items in cart
   const [wishlistCount, setWishlistCount] = useState(5); // Example: 5 items in wishlist
 
+  // User data - you can connect this to your authentication state
+  const [user, setUser] = useState({
+    name: 'John Doe',
+    email: 'john@example.com',
+    avatar: null, // You can add avatar URL here
+  });
+
   const navigate = useNavigate();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const menuItems = [
     { name: 'Home', path: path.home },
@@ -57,9 +85,19 @@ const Navbar = () => {
   const bottomNavItems = [
     { id: 'home', icon: FaHome, label: 'Home' },
     { id: 'product', icon: FaStore, label: 'Product' }, // renamed from shop
-    { id: 'search', icon: FaSearch, label: 'Search' },
+    { id: 'search', icon: searchActive ? FaTimes : FaSearch, label: 'Search' }, // Dynamic icon
     { id: 'cart', icon: FaShoppingCart, label: 'Cart', count: cartCount },
     { id: 'wishlist', icon: FaHeart, label: 'Wishlist', count: wishlistCount },
+  ];
+
+  // User dropdown menu items
+  const userMenuItems = [
+    { icon: FaUser, label: 'My Profile', path: '/profile' },
+    { icon: FaClipboardList, label: 'My Orders', path: '/orders' },
+    { icon: FaHeart, label: 'Wishlist', path: path.wishlist },
+    { icon: FaCog, label: 'Settings', path: '/settings' },
+    { icon: FaQuestionCircle, label: 'Help & Support', path: '/support' },
+    { icon: FaSignOutAlt, label: 'Logout', action: 'logout' },
   ];
 
   const handleSearch = () => {
@@ -67,12 +105,21 @@ const Navbar = () => {
   };
 
   const handleBottomNavClick = (tabId) => {
-    setActiveBottomTab(tabId);
     if (tabId === 'search') {
-      setSearchActive(true);
+      // Toggle search functionality
+      if (searchActive) {
+        // If search is active, close it
+        handleSearchClose();
+      } else {
+        // If search is not active, open it
+        setSearchActive(true);
+        setActiveBottomTab(tabId);
+      }
     } else {
+      // For other tabs, close search and navigate
       setSearchActive(false);
       setSearchText('');
+      setActiveBottomTab(tabId);
       navigate(`/${tabId}`);
     }
   };
@@ -80,7 +127,19 @@ const Navbar = () => {
   const handleSearchClose = () => {
     setSearchActive(false);
     setSearchText('');
-    setActiveBottomTab('home');
+    setActiveBottomTab('home'); // Reset to home tab when search is closed
+  };
+
+  const handleUserMenuClick = (item) => {
+    if (item.action === 'logout') {
+      // Handle logout logic here
+      console.log('Logging out...');
+      // You can add your logout logic here
+      // Example: dispatch(logout()) or call logout API
+    } else if (item.path) {
+      navigate(item.path);
+    }
+    setShowUserDropdown(false); // Close dropdown after any menu item click
   };
 
   // Icon with badge component
@@ -140,7 +199,49 @@ const Navbar = () => {
             {!searchActive ? (
               <>
                 <FaSearch className="icon desktop-only" onClick={() => setSearchActive(true)} />
-                <FaUserCircle className="icon" />
+
+                {/* User Profile Icon with Dropdown */}
+                <div
+                  className="user-profile-wrapper"
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                >
+                  <FaUserCircle className="icon user-icon" />
+
+                  {/* User Dropdown Menu */}
+                  {showUserDropdown && (
+                    <div className="user-dropdown">
+                      <div className="user-info">
+                        <div className="user-avatar">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt="User Avatar" />
+                          ) : (
+                            <FaUserCircle />
+                          )}
+                        </div>
+                        <div className="user-details">
+                          <h4>{user.name}</h4>
+                          <p>{user.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="dropdown-divider"></div>
+
+                      <ul className="user-menu-list">
+                        {userMenuItems.map((item, index) => (
+                          <li
+                            key={index}
+                            className="user-menu-item"
+                            onClick={() => handleUserMenuClick(item)}
+                          >
+                            <item.icon className="menu-icon" />
+                            <span>{item.label}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
                 <Link to={path.wishlist} className="desktop-only">
                   <IconWithBadge
                     icon={FaHeart}
@@ -187,7 +288,11 @@ const Navbar = () => {
           return (
             <div
               key={item.id}
-              className={`bottom-nav-item ${activeBottomTab === item.id ? 'active' : ''}`}
+              className={`bottom-nav-item ${
+                item.id === 'search' 
+                  ? (searchActive ? 'active' : '') 
+                  : (activeBottomTab === item.id ? 'active' : '')
+              }`}
               onClick={() => handleBottomNavClick(item.id)}
             >
               {item.count !== undefined ? (
