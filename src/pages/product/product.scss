@@ -63,14 +63,6 @@
       text-align: center;
       margin: 0;
     }
-
-    // Optional empty state icon
-    &::before {
-      content: '📦';
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
   }
 
   .product-container {

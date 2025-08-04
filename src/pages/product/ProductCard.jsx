@@ -1,23 +1,70 @@
-// ProductCard.jsx
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
-import {FaHeart, FaStar} from 'react-icons/fa';
+import {FaHeart} from 'react-icons/fa';
 import {FiShoppingCart} from 'react-icons/fi';
 import "./productCard.scss";
+import {MdOutlineRemoveShoppingCart} from "react-icons/md";
+import {useApp} from "../../components/context/AppContext.jsx";
 
-const ProductCard = ({product, onAddToCart, onWishlist}) => {
-    const [isWishlisted, setIsWishlisted] = useState(false);
+const ProductCard = ({product, cartItems, onAddToCart, onWishlist, onRemoveFromCart, onEdit, onDelete, showEditDelete = true}) => {
     const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [isInCart, setIsInCart] = useState(false);
 
-    const handleWishlist = () => {
-        setIsWishlisted(!isWishlisted);
-        onWishlist?.(product);
+    // App context থেকে wishlist data নিন
+    const { isInWishlist } = useApp();
+    const [isWishlisted, setIsWishlisted] = useState(false);
+
+    const handleWishlist = async () => {
+        const success = await onWishlist?.(product);
+        if (success) {
+            setIsWishlisted(!isWishlisted);
+        }
     };
+
+    useEffect(() => {
+        // cartItems prop check করুন
+        if (cartItems && Array.isArray(cartItems)) {
+            const found = cartItems.some(item => item.product_id === product.id);
+            setIsInCart(found);
+        } else {
+            console.warn('cartItems is not defined or not an array:', cartItems);
+            setIsInCart(false);
+        }
+    }, [cartItems, product.id]);
+
+    useEffect(() => {
+        if (typeof isInWishlist === 'function' && product && product.id) {
+            setIsWishlisted(isInWishlist(product.id));
+        }
+    }, [isInWishlist, product.id]);
 
     const handleAddToCart = async () => {
         setIsAddingToCart(true);
-        await onAddToCart?.(product);
-        setTimeout(() => setIsAddingToCart(false), 1000);
+        try {
+            await onAddToCart?.(product);
+            setIsInCart(true);
+        } catch (error) {
+            console.error('Add to cart failed:', error);
+            // Keep cart state unchanged on failure
+        } finally {
+            setTimeout(() => setIsAddingToCart(false), 500);
+        }
+    };
+
+    const handleRemoveFromCart = async () => {
+        setIsAddingToCart(true);
+        try {
+            const success = await onRemoveFromCart?.(product);
+            // Only update cart state if removal was successful
+            if (success) {
+                setIsInCart(false);
+            }
+        } catch (error) {
+            console.error('Remove from cart failed:', error);
+            // Keep cart state unchanged on failure
+        } finally {
+            setTimeout(() => setIsAddingToCart(false), 500);
+        }
     };
 
     const formatPrice = (price) => {
@@ -27,13 +74,19 @@ const ProductCard = ({product, onAddToCart, onWishlist}) => {
         }).format(price);
     };
 
+    // Product data validation
+    if (!product) {
+        console.error('Product data is missing');
+        return null;
+    }
+
     return (
         <div className="product">
             {/* Image container */}
             <div className="product-image-container">
                 <img
                     src={product.image ? `http://localhost:8000/storage/${product.image}` : '/placeholder-image.png'}
-                    alt={product.name}
+                    alt={product.name || 'Product'}
                     className="product-img"
                     onError={(e) => {
                         e.target.src = '/placeholder-image.png';
@@ -51,19 +104,43 @@ const ProductCard = ({product, onAddToCart, onWishlist}) => {
 
             {/* Product information */}
             <div className="product-info">
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-description text-truncate">{product.description}</p>
-                <div className="product-price">{formatPrice(product.price)}</div>
+                <h3 className="product-name">{product.name || 'Unknown Product'}</h3>
+                <p className="product-description text-truncate">{product.description || 'No description'}</p>
+                <div className="product-price">{formatPrice(product.price || 0)}</div>
             </div>
 
             <div className="product-actions">
-                <CustomSubmitButton
-                    onClick={handleAddToCart}
-                    type="button"
-                    icon={<FiShoppingCart />}
-                    label="Add to Cart"
-                    btnClassName="default-submit-btn add-to-cart-btn"
-                />
+                {isInCart ? (
+                    <CustomSubmitButton
+                        onClick={handleRemoveFromCart}
+                        type="button"
+                        icon={<MdOutlineRemoveShoppingCart/>}
+                        label="Remove from Cart"
+                        btnClassName="default-remove-btn add-to-cart-btn"
+                        isLoading={isAddingToCart}
+                    />
+                ) : (
+                    <CustomSubmitButton
+                        onClick={handleAddToCart}
+                        type="button"
+                        icon={<FiShoppingCart/>}
+                        label="Add to Cart"
+                        btnClassName="default-submit-btn add-to-cart-btn"
+                        isLoading={isAddingToCart}
+                    />
+                )}
+
+                {/* Edit/Delete buttons শুধুমাত্র product page এ দেখাবো */}
+                {showEditDelete && onEdit && onDelete && (
+                    <div className="admin-actions">
+                        <button onClick={() => onEdit(product)} className="edit-btn">
+                            Edit
+                        </button>
+                        <button onClick={() => onDelete(product.id)} className="delete-btn">
+                            Delete
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

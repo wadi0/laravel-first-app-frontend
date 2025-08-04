@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import AxiosServices from "../../components/network/AxiosServices.jsx";
 import ApiUrlServices from "../../components/network/ApiUrlServices.jsx";
 import "./product.scss";
@@ -7,6 +7,8 @@ import CustomModal from "../../components/custommodal/CustomModal.jsx";
 import AddProduct from "./AddProduct.jsx";
 import CustomSelect from "../../components/customselect/CustomSelect.jsx";
 import ProductCard from "./ProductCard.jsx";
+import {toast} from "react-toastify";
+import {useApp} from "../../components/context/AppContext.jsx";
 
 const Product = () => {
     const [productList, setProductList] = useState([]);
@@ -16,6 +18,14 @@ const Product = () => {
     const [categoryList, setCategoryList] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // App context থেকে functions এবং data নিন
+    const { cartItems, addToCart, removeFromCart, toggleWishlist } = useApp();
+
+    // Debug: Context data check করুন
+    useEffect(() => {
+        console.log('Cart Items in Product component:', cartItems);
+    }, [cartItems]);
 
     const toggleModal = () => {
         setShowModal(!showModal);
@@ -84,8 +94,35 @@ const Product = () => {
         setSelectedCategory(e.target.value);
     };
 
+    // Cart operations with toast messages
+    const handleAddToCart = async (product) => {
+        const success = await addToCart(product);
+        if (success) {
+            toast.success("Product added to cart!");
+        } else {
+            toast.error("Add to cart failed");
+        }
+        return success;
+    };
+
+    const handleRemoveFromCart = async (product) => {
+        const success = await removeFromCart(product);
+        if (success) {
+            toast.success("Remove from cart successfully!");
+        } else {
+            toast.error("Remove from cart failed");
+        }
+        return success;
+    };
+
+    // Wishlist operations
+    const handleWishlist = async (product) => {
+        const result = await toggleWishlist(product);
+        return result.success;
+    };
+
     const categoryOptions = [
-        { label: 'All Categories', value: '' },
+        {label: 'All Categories', value: ''},
         ...categoryList.map((item) => ({
             label: item.name.toUpperCase(),
             value: item.id,
@@ -119,22 +156,25 @@ const Product = () => {
                 <div className="loading-container">
                     <p>Loading products...</p>
                 </div>
+            ) : filteredProducts.length === 0 ? (
+                <div className="no-products">
+                    <p>No products found.</p>
+                </div>
             ) : (
                 <div className="product-container">
-                    {filteredProducts.length === 0 ? (
-                        <div className="no-products">
-                            <p>No products found.</p>
-                        </div>
-                    ) : (
-                        filteredProducts.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                onEdit={handleEdit}
-                                onDelete={deleteProduct}
-                            />
-                        ))
-                    )}
+                    {filteredProducts.map((product) => (
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            cartItems={cartItems || []} // Fallback empty array
+                            onEdit={handleEdit}
+                            onDelete={deleteProduct}
+                            onAddToCart={handleAddToCart}
+                            onRemoveFromCart={handleRemoveFromCart}
+                            onWishlist={handleWishlist}
+                            showEditDelete={true}
+                        />
+                    ))}
                 </div>
             )}
 

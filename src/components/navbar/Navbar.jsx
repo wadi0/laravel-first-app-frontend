@@ -8,7 +8,7 @@ import {
   FaChevronDown,
   FaBars,
   FaHome,
-  FaBox, // Product icon instead of FaStore
+  FaBox,
   FaUser,
   FaCog,
   FaSignOutAlt,
@@ -18,7 +18,8 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import './navbar.scss';
 import logo from '../../assets/my_logo.png';
-import path from '../../routes/path.jsx'; // Using your centralized path
+import path from '../../routes/path.jsx';
+import {useApp} from "../context/AppContext.jsx";
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -29,15 +30,17 @@ const Navbar = () => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const userDropdownRef = useRef(null);
 
-  // Cart and Wishlist count states - you can connect these to your state management
-  const [cartCount, setCartCount] = useState(3); // Example: 3 items in cart
-  const [wishlistCount, setWishlistCount] = useState(5); // Example: 5 items in wishlist
+  // App context থেকে cart এবং wishlist count নিন
+  const { cartCount, wishlistCount } = useApp();
 
-  // User data - you can connect this to your authentication state
+  // Wishlist count - এখন context থেকে আসবে
+  // const [wishlistCount, setWishlistCount] = useState(5); // এই line টা remove করুন
+
+  // User data
   const [user, setUser] = useState({
     name: 'John Doe',
     email: 'john@example.com',
-    avatar: null, // You can add avatar URL here
+    avatar: null,
   });
 
   const navigate = useNavigate();
@@ -84,9 +87,9 @@ const Navbar = () => {
 
   const bottomNavItems = [
     { id: 'home', icon: FaHome, label: 'Home' },
-    { id: 'product', icon: FaBox, label: 'Product' }, // Changed from FaStore to FaBox (product icon)
-    { id: 'search', icon: searchActive ? FaTimes : FaSearch, label: 'Search' }, // Dynamic icon
-    { id: 'cart', icon: FaShoppingCart, label: 'Cart', count: cartCount },
+    { id: 'product', icon: FaBox, label: 'Product' },
+    { id: 'search', icon: searchActive ? FaTimes : FaSearch, label: 'Search' },
+    { id: 'cart', icon: FaShoppingCart, label: 'Cart', count: cartCount }, // Dynamic cart count
     { id: 'wishlist', icon: FaHeart, label: 'Wishlist', count: wishlistCount },
   ];
 
@@ -106,40 +109,45 @@ const Navbar = () => {
 
   const handleBottomNavClick = (tabId) => {
     if (tabId === 'search') {
-      // Toggle search functionality
       if (searchActive) {
-        // If search is active, close it
         handleSearchClose();
       } else {
-        // If search is not active, open it
         setSearchActive(true);
         setActiveBottomTab(tabId);
       }
     } else {
-      // For other tabs, close search and navigate
       setSearchActive(false);
       setSearchText('');
       setActiveBottomTab(tabId);
-      navigate(`/${tabId}`);
+
+      // Navigate to appropriate routes
+      if (tabId === 'home') {
+        navigate('/');
+      } else if (tabId === 'product') {
+        navigate('/product');
+      } else if (tabId === 'cart') {
+        navigate('/cart');
+      } else if (tabId === 'wishlist') {
+        navigate('/wishlist');
+      } else {
+        navigate(`/${tabId}`);
+      }
     }
   };
 
   const handleSearchClose = () => {
     setSearchActive(false);
     setSearchText('');
-    setActiveBottomTab('home'); // Reset to home tab when search is closed
+    setActiveBottomTab('home');
   };
 
   const handleUserMenuClick = (item) => {
     if (item.action === 'logout') {
-      // Handle logout logic here
       console.log('Logging out...');
-      // You can add your logout logic here
-      // Example: dispatch(logout()) or call logout API
     } else if (item.path) {
       navigate(item.path);
     }
-    setShowUserDropdown(false); // Close dropdown after any menu item click
+    setShowUserDropdown(false);
   };
 
   // Icon with badge component
@@ -200,14 +208,12 @@ const Navbar = () => {
               <>
                 <FaSearch className="icon desktop-only" onClick={() => setSearchActive(true)} />
 
-                {/* User Profile Icon with Dropdown */}
                 <div
                   className="user-profile-wrapper"
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
                 >
                   <FaUserCircle className="icon user-icon" />
 
-                  {/* User Dropdown Menu */}
                   {showUserDropdown && (
                     <div className="user-dropdown">
                       <div className="user-info">
@@ -252,7 +258,7 @@ const Navbar = () => {
                 <Link to={path.cart} className="desktop-only">
                   <IconWithBadge
                     icon={FaShoppingCart}
-                    count={cartCount}
+                    count={cartCount} // Dynamic cart count
                     className="icon"
                   />
                 </Link>
@@ -282,68 +288,37 @@ const Navbar = () => {
       </header>
 
       {/* Bottom Navigation */}
-      {/*<div className="bottom-navigation">*/}
-      {/*  {bottomNavItems.map((item) => {*/}
-      {/*    const IconComponent = item.icon;*/}
-      {/*    return (*/}
-      {/*      <div*/}
-      {/*        key={item.id}*/}
-      {/*        className={`bottom-nav-item ${*/}
-      {/*          item.id === 'search' */}
-      {/*            ? (searchActive ? 'active' : '') */}
-      {/*            : (activeBottomTab === item.id ? 'active' : '')*/}
-      {/*        }`}*/}
-      {/*        onClick={() => handleBottomNavClick(item.id)}*/}
-      {/*      >*/}
-      {/*        {item.count !== undefined ? (*/}
-      {/*          <div className="icon-with-badge">*/}
-      {/*            <IconComponent className="bottom-nav-icon" />*/}
-      {/*            {item.count > 0 && (*/}
-      {/*              <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>*/}
-      {/*            )}*/}
-      {/*          </div>*/}
-      {/*        ) : (*/}
-      {/*          <IconComponent className="bottom-nav-icon" />*/}
-      {/*        )}*/}
-      {/*        <span className="bottom-nav-label">{item.label}</span>*/}
-      {/*      </div>*/}
-      {/*    );*/}
-      {/*  })}*/}
-      {/*</div>*/}
-      // Bottom Navigation section এর জন্য updated code:
+      <div className="bottom-navigation">
+        {bottomNavItems.map((item) => {
+          const IconComponent = item.icon;
+          const isSearchClose = item.id === 'search' && searchActive;
 
-{/* Bottom Navigation */}
-<div className="bottom-navigation">
-  {bottomNavItems.map((item) => {
-    const IconComponent = item.icon;
-    const isSearchClose = item.id === 'search' && searchActive;
-
-    return (
-      <div
-        key={item.id}
-        className={`bottom-nav-item ${
-          item.id === 'search' 
-            ? (searchActive ? 'active' : '') 
-            : (activeBottomTab === item.id ? 'active' : '')
-        }`}
-        data-search-close={isSearchClose} // এই line টা add করুন
-        onClick={() => handleBottomNavClick(item.id)}
-      >
-        {item.count !== undefined ? (
-          <div className="icon-with-badge">
-            <IconComponent className="bottom-nav-icon" />
-            {item.count > 0 && (
-              <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>
-            )}
-          </div>
-        ) : (
-          <IconComponent className="bottom-nav-icon" />
-        )}
-        <span className="bottom-nav-label">{item.label}</span>
+          return (
+            <div
+              key={item.id}
+              className={`bottom-nav-item ${
+                item.id === 'search' 
+                  ? (searchActive ? 'active' : '') 
+                  : (activeBottomTab === item.id ? 'active' : '')
+              }`}
+              data-search-close={isSearchClose}
+              onClick={() => handleBottomNavClick(item.id)}
+            >
+              {item.count !== undefined ? (
+                <div className="icon-with-badge">
+                  <IconComponent className="bottom-nav-icon" />
+                  {item.count > 0 && (
+                    <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>
+                  )}
+                </div>
+              ) : (
+                <IconComponent className="bottom-nav-icon" />
+              )}
+              <span className="bottom-nav-label">{item.label}</span>
+            </div>
+          );
+        })}
       </div>
-    );
-  })}
-</div>
 
       {/* Mobile Sidebar */}
       {mobileSidebarOpen && (
