@@ -6,7 +6,7 @@ import "./productCard.scss";
 import {MdOutlineRemoveShoppingCart} from "react-icons/md";
 import {useApp} from "../../components/context/AppContext.jsx";
 
-const ProductCard = ({product, cartItems, onAddToCart, onWishlist, onRemoveFromCart, onEdit, onDelete, showEditDelete = true}) => {
+const ProductCard = ({product, cartItems, onAddToCart, onWishlist, onRemoveFromCart}) => {
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isInCart, setIsInCart] = useState(false);
 
@@ -128,18 +128,6 @@ const ProductCard = ({product, cartItems, onAddToCart, onWishlist, onRemoveFromC
                         btnClassName="default-submit-btn add-to-cart-btn"
                         isLoading={isAddingToCart}
                     />
-                )}
-
-                {/* Edit/Delete buttons শুধুমাত্র product page এ দেখাবো */}
-                {showEditDelete && onEdit && onDelete && (
-                    <div className="admin-actions">
-                        <button onClick={() => onEdit(product)} className="edit-btn">
-                            Edit
-                        </button>
-                        <button onClick={() => onDelete(product.id)} className="delete-btn">
-                            Delete
-                        </button>
-                    </div>
                 )}
             </div>
         </div>

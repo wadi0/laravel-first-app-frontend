@@ -9,6 +9,7 @@ import CustomSelect from "../../components/customselect/CustomSelect.jsx";
 import ProductCard from "./ProductCard.jsx";
 import {toast} from "react-toastify";
 import {useApp} from "../../components/context/AppContext.jsx";
+import CustomPagination from "../../components/pagination/Pagination.jsx";
 
 const Product = () => {
     const [productList, setProductList] = useState([]);
@@ -18,6 +19,12 @@ const Product = () => {
     const [categoryList, setCategoryList] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // API Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(12);
 
     // App context থেকে functions এবং data নিন
     const { cartItems, addToCart, removeFromCart, toggleWishlist } = useApp();
@@ -46,52 +53,47 @@ const Product = () => {
         fetchCategories();
     }, []);
 
+    // Fetch products when page or category changes
     useEffect(() => {
         getAllProductList();
-    }, []);
+    }, [currentPage, selectedCategory, itemsPerPage]);
 
-    useEffect(() => {
-        if (selectedCategory === '') {
-            setFilteredProducts(productList);
-        } else {
-            const filtered = productList.filter(product =>
-                product.category_id === parseInt(selectedCategory)
-            );
-            setFilteredProducts(filtered);
-        }
-    }, [selectedCategory, productList]);
-
+    // API call with pagination parameters
     const getAllProductList = async () => {
         setLoading(true);
         try {
-            const res = await AxiosServices.get(ApiUrlServices.ALL_PRODUCT_LIST);
-            setProductList(res.data.data);
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                per_page: itemsPerPage.toString()
+            });
+
+            // Add category filter if selected
+            if (selectedCategory) {
+                params.append('category_id', selectedCategory);
+            }
+
+            const res = await AxiosServices.get(`${ApiUrlServices.ALL_PRODUCT_LIST}?${params}`);
+            console.log('API Response:', res.data);
+
+            // Laravel pagination response structure
+            setProductList(res.data.data); // Current page products
+            setFilteredProducts(res.data.data); // For display
+            setTotalPages(res.data.last_page); // Total pages
+            setTotalItems(res.data.total); // Total items
+            setCurrentPage(res.data.current_page); // Current page from API
+
         } catch (err) {
             console.error('Error fetching products:', err);
+            toast.error('Failed to load products');
         } finally {
             setLoading(false);
         }
     };
 
-    const deleteProduct = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this product?')) return;
-        try {
-            await AxiosServices.delete(ApiUrlServices.DELETE_PRODUCT(id));
-            getAllProductList();
-            alert("Product deleted successfully!");
-        } catch (err) {
-            console.error('Error deleting product:', err);
-            alert("Error deleting product. Please try again.");
-        }
-    };
-
-    const handleEdit = (product) => {
-        setEditingProduct(product);
-        setShowModal(true);
-    };
-
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
+        setCurrentPage(1); // Reset to first page when filtering
     };
 
     // Cart operations with toast messages
@@ -121,6 +123,18 @@ const Product = () => {
         return result.success;
     };
 
+    // Handle pagination change using CustomPagination
+    const handlePageChange = (event, page) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Handle items per page change using CustomPagination
+    const handleItemsPerPageChange = (event) => {
+        setItemsPerPage(parseInt(event.target.value));
+        setCurrentPage(1); // Reset to first page
+    };
+
     const categoryOptions = [
         {label: 'All Categories', value: ''},
         ...categoryList.map((item) => ({
@@ -132,56 +146,116 @@ const Product = () => {
     return (
         <div className="product-wrapper">
             <div className="top-bar">
-                <CustomSelect
-                    id="category-filter-select"
-                    name="category_id"
-                    label="Filter by Category"
-                    placeholder="Please select category"
-                    value={selectedCategory}
-                    onChange={handleCategoryChange}
-                    options={categoryOptions}
-                    disabled={false}
-                />
+                <div className="filter-section">
+                    <CustomSelect
+                        id="category-filter-select"
+                        name="category_id"
+                        label="Filter by Category"
+                        placeholder="Please select category"
+                        value={selectedCategory}
+                        onChange={handleCategoryChange}
+                        options={categoryOptions}
+                        disabled={loading}
+                    />
 
-                <CustomSubmitButton
-                    isLoading={loading}
-                    onClick={toggleModal}
-                    type="button"
-                    label="+ Add Product"
-                    btnClassName="default-submit-btn"
-                />
+                    {/* Results count */}
+                    {!loading && (
+                        <div className="results-count">
+                            <span>
+                                Showing {filteredProducts.length} of {totalItems} products
+                                {selectedCategory && (
+                                    <span className="category-filter">
+                                        {' '}in {categoryList.find(cat => cat.id === parseInt(selectedCategory))?.name}
+                                    </span>
+                                )}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/*<CustomSubmitButton*/}
+                {/*    isLoading={loading}*/}
+                {/*    onClick={toggleModal}*/}
+                {/*    type="button"*/}
+                {/*    label="+ Add Product"*/}
+                {/*    btnClassName="default-submit-btn"*/}
+                {/*/>*/}
             </div>
 
             {loading ? (
                 <div className="loading-container">
+                    <div className="loading-spinner"></div>
                     <p>Loading products...</p>
                 </div>
             ) : filteredProducts.length === 0 ? (
                 <div className="no-products">
-                    <p>No products found.</p>
+                    <div className="no-products-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="m1 1 4 4 5.8 13.4a2 2 0 0 0 1.9 1.3h9.9a2 2 0 0 0 1.9-1.4L21.4 6H7"></path>
+                            <path d="m7 18 10-10"></path>
+                        </svg>
+                    </div>
+                    <h3>No products found</h3>
+                    <p>
+                        {selectedCategory
+                            ? 'No products found in the selected category. Try selecting a different category.'
+                            : 'No products available at the moment. Check back later or add some products.'
+                        }
+                    </p>
+                    {selectedCategory && (
+                        <button
+                            className="clear-filter-btn"
+                            onClick={() => setSelectedCategory('')}
+                        >
+                            Clear Filter
+                        </button>
+                    )}
                 </div>
             ) : (
-                <div className="product-container">
-                    {filteredProducts.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                            cartItems={cartItems || []} // Fallback empty array
-                            onEdit={handleEdit}
-                            onDelete={deleteProduct}
-                            onAddToCart={handleAddToCart}
-                            onRemoveFromCart={handleRemoveFromCart}
-                            onWishlist={handleWishlist}
-                            showEditDelete={true}
-                        />
-                    ))}
-                </div>
+                <>
+                    <div className="product-container">
+                        {filteredProducts.map((product) => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                cartItems={cartItems || []}
+                                onAddToCart={handleAddToCart}
+                                onRemoveFromCart={handleRemoveFromCart}
+                                onWishlist={handleWishlist}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Custom Pagination Component */}
+                    <CustomPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                        onItemsPerPageChange={handleItemsPerPageChange}
+                        loading={loading}
+                        showInfo={true}
+                        showItemsPerPageSelector={true}
+                        itemsPerPageOptions={[6, 12, 24, 48]}
+                        size="large"
+                        color="primary"
+                        showFirstButton={true}
+                        showLastButton={true}
+                        siblingCount={2}
+                        boundaryCount={1}
+                        className="product-pagination"
+                        disabled={false}
+                    />
+                </>
             )}
 
             <CustomModal
                 isOpen={showModal}
                 onClose={toggleModal}
-                title={editingProduct !== null ? "Update Product" : "Add New Product"}
+                title="Add New Product"
             >
                 <AddProduct
                     product={editingProduct}

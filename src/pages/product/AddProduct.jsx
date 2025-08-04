@@ -202,7 +202,7 @@ const AddProduct = ({product, onSuccess, categoryList}) => {
                                     cropperHeight={250}
                                     icon={FaCloudUploadAlt}
                                     multiple={false}
-                                    enableCrop={true}
+                                    enableCrop={false}
                                     aspect={1}
                                 />
                                 {/*<ErrorMessage name="image" component="div" className="error-message"/>*/}
