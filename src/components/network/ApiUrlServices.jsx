@@ -15,6 +15,7 @@ const ApiUrlServices = {
     // cart api
     ALL_CART_LIST: "cart",
     ADD_CART: "cart",
+    UPDATE_CART: (id) => `/cart/${id}`,
     DELETE_CART: (id) => `/cart/${id}`,
     // wishlist api
     ALL_WISHLIST_LIST: "wishlist",

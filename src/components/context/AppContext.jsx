@@ -110,14 +110,18 @@ export const AppProvider = ({ children }) => {
             const cartItem = cartItems.find(item => item.product_id === product.id);
 
             if (!cartItem) {
+                console.error('Cart item not found for product:', product.id);
+                toast.error("Cart item not found");
                 return false;
             }
 
-            const payload = {
-                quantity: newQuantity,
-            };
+            console.log('Updating cart item:', cartItem.id, 'to quantity:', newQuantity);
 
-            const response = await AxiosServices.put(ApiUrlServices.UPDATE_CART_QUANTITY(cartItem.id), payload);
+            const payload = { quantity: newQuantity };
+            const apiUrl = ApiUrlServices.UPDATE_CART(cartItem.id);
+            console.log('API URL:', apiUrl);
+
+            const response = await AxiosServices.put(apiUrl, payload);
             console.log('Update quantity response:', response.data);
 
             // Update local state
@@ -131,9 +135,20 @@ export const AppProvider = ({ children }) => {
                 return updated;
             });
 
+            toast.success("Quantity updated successfully!");
             return true;
         } catch (err) {
             console.error("Update quantity failed:", err);
+
+            // Better error messages
+            if (err.response?.status === 422) {
+                toast.error(err.response.data.message || "Stock limited");
+            } else if (err.response?.status === 404) {
+                toast.error("Cart item not found");
+            } else {
+                toast.error("Failed to update quantity");
+            }
+
             return false;
         }
     };
@@ -251,9 +266,9 @@ export const AppProvider = ({ children }) => {
 
     const value = {
         // Cart
-        cartItems,
-        cartCount,
-        cartLoading,
+        cartItems: cartItems || [], // Safety fallback
+        cartCount: cartCount || 0,
+        cartLoading: cartLoading || false,
         addToCart,
         removeFromCart,
         updateCartQuantity,
@@ -261,9 +276,9 @@ export const AppProvider = ({ children }) => {
         isInCart,
 
         // Wishlist
-        wishlistItems,
-        wishlistCount,
-        wishlistLoading,
+        wishlistItems: wishlistItems || [], // Safety fallback
+        wishlistCount: wishlistCount || 0,
+        wishlistLoading: wishlistLoading || false,
         addToWishlist,
         removeFromWishlist,
         toggleWishlist,
