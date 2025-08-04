@@ -3,7 +3,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 273px;
+  // max-width: 273px; // ❌ এটা সরিয়ে দিয়েছি
   overflow: hidden;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -91,6 +91,7 @@
     100% { transform: rotate(360deg); }
   }
 
+  // ✅ Mobile responsive এর জন্য রাখা হয়েছে
   @media (max-width: 768px) {
     max-width: 100%;
   }
