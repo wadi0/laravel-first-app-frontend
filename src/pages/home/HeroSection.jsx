@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import './heroSection.scss';
 import summercollection from "../../assets/collection/summer.jpg";
 import wintercollection from "../../assets/collection/winter.jpg";
 import specialcollection from "../../assets/collection/specialcollection.jpg";
 import newcollection from "../../assets/collection/newcollection.jpg";
 import otherscollection from "../../assets/collection/otherscollection.jpg";
+import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
+import {useNavigate} from "react-router-dom";
 
 const HeroSection = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
+    const navigate = useNavigate();
 
     // Collection data for slider
     const collectionData = [
@@ -97,11 +100,13 @@ const HeroSection = () => {
                                     <p className="collection-description">
                                         {collection.description}
                                     </p>
-                                    <div className="collection-buttons">
-                                        <a href={`#${collection.slug}`} className="collection-btn primary">
-                                            {collection.buttonText}
-                                        </a>
-                                    </div>
+                                    <CustomSubmitButton
+                                        onClick={() => navigate(`#${collection.slug}`)}
+                                        type="button"
+                                        label={collection.buttonText}
+                                        btnClassName="dedefault-submit-btn"
+                                        // isLoading={}
+                                    />
                                 </div>
                             </div>
                         </div>

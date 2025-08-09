@@ -1,11 +1,5 @@
 import React from 'react';
-import Collection from "../collection/Collection.jsx";
 import "./home.scss";
-import summercollection from "../../assets/collection/summer.jpg";
-import wintercollection from "../../assets/collection/winter.jpg";
-import specialcollection from "../../assets/collection/specialcollection.jpg";
-import newcollection from "../../assets/collection/newcollection.jpg";
-import otherscollection from "../../assets/collection/otherscollection.jpg";
 import HeroSection from "./HeroSection.jsx";
 import FeaturedProducts from "./FeaturedProducts.jsx";
 import Testimonials from "./Testimonials.jsx";
@@ -13,38 +7,6 @@ import BrandLogos from "./BrandLogos.jsx";
 import NewsletterSignup from "./NewsLetterSignup.jsx";
 
 const Home = () => {
-    const collectionData = [
-        {
-            "id": 1,
-            "name": "New Collection",
-            "slug": "new-collection",
-            "image": newcollection
-        },
-        {
-            "id": 2,
-            "name": "Summer Collection",
-            "slug": "summer-collection",
-            "image": summercollection
-        },
-        {
-            "id": 3,
-            "name": "Winter Collection",
-            "slug": "winter-collection",
-            "image": wintercollection
-        },
-        {
-            "id": 4,
-            "name": "Special Collection",
-            "slug": "special-collection",
-            "image": specialcollection
-        },
-        {
-            "id": 5,
-            "name": "Others Collection",
-            "slug": "others-collection",
-            "image": otherscollection
-        },
-    ];
 
     const featuresData = [
         {
@@ -96,24 +58,6 @@ const Home = () => {
                             <h3 className="feature-title">{feature.title}</h3>
                             <p className="feature-description">{feature.description}</p>
                         </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Collections Section */}
-            <section className="collections-section">
-                <div className="section-header">
-                    <h2 className="section-title">Shop by Collection</h2>
-                    <p className="section-subtitle">Discover our curated collections</p>
-                </div>
-                <div className="collections-wrapper">
-                    {collectionData.map((col) => (
-                        <Collection
-                            key={col.id}
-                            name={col.name}
-                            slug={col.slug}
-                            img={col.image}
-                        />
                     ))}
                 </div>
             </section>

@@ -1,7 +1,7 @@
 .hero-section {
   position: relative;
-  height: 80vh;
-  min-height: 500px;
+  height: 350px;
+  min-height: 350px;
   overflow: hidden;
   border-radius: 20px;
   margin-bottom: 40px;
@@ -118,38 +118,6 @@
               @media (max-width: 768px) {
                 font-size: 1.2rem;
                 margin-bottom: 30px;
-              }
-            }
-
-            .collection-buttons {
-              display: flex;
-              justify-content: center;
-
-              .collection-btn {
-                display: inline-block;
-                padding: 18px 36px;
-                border-radius: 35px;
-                font-size: 1.1rem;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-                cursor: pointer;
-                transition: all 0.4s ease;
-                border: 2px solid transparent;
-                text-decoration: none;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-
-                &:hover {
-                  transform: translateY(-3px);
-                  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
-                }
-
-                @media (max-width: 768px) {
-                  padding: 15px 30px;
-                  font-size: 1rem;
-                }
               }
             }
           }
@@ -274,9 +242,6 @@
 
 @media (max-width: 900px) {
   .hero-section {
-    height: 450px;
-    min-height: 450px;
-
     .collection-slider {
       .collection-slide {
         .collection-container {
@@ -295,13 +260,6 @@
                 font-size: 1.2rem;
                 margin-bottom: 35px;
               }
-
-              .collection-buttons {
-                .collection-btn {
-                  padding: 16px 32px;
-                  font-size: 1rem;
-                }
-              }
             }
           }
         }
@@ -316,10 +274,6 @@
 
 @media (max-width: 768px) {
   .hero-section {
-    height: 400px;
-    min-height: 400px;
-    margin-bottom: 30px;
-
     .collection-slider {
       .collection-slide {
         .collection-container {
@@ -338,14 +292,6 @@
                 font-size: 1.1rem;
                 margin-bottom: 30px;
                 max-width: 500px;
-              }
-
-              .collection-buttons {
-                .collection-btn {
-                  padding: 15px 30px;
-                  font-size: 0.95rem;
-                  min-width: 180px;
-                }
               }
             }
           }
@@ -367,9 +313,6 @@
 
 @media (max-width: 640px) {
   .hero-section {
-    height: 380px;
-    min-height: 380px;
-
     .collection-slider {
       .collection-slide {
         .collection-container {
@@ -386,14 +329,6 @@
                 font-size: 1rem;
                 margin-bottom: 25px;
                 max-width: 450px;
-              }
-
-              .collection-buttons {
-                .collection-btn {
-                  padding: 14px 28px;
-                  font-size: 0.9rem;
-                  min-width: 160px;
-                }
               }
             }
           }
@@ -415,9 +350,6 @@
 
 @media (max-width: 480px) {
   .hero-section {
-    height: 350px;
-    min-height: 350px;
-
     .collection-slider {
       .collection-slide {
         .collection-container {
@@ -436,15 +368,6 @@
                 margin-bottom: 20px;
                 max-width: 320px;
                 line-height: 1.5;
-              }
-
-              .collection-buttons {
-                .collection-btn {
-                  padding: 12px 24px;
-                  font-size: 0.85rem;
-                  width: 100%;
-                  max-width: 220px;
-                }
               }
             }
           }
@@ -486,14 +409,6 @@
                 margin-bottom: 18px;
                 max-width: 280px;
               }
-
-              .collection-buttons {
-                .collection-btn {
-                  padding: 10px 20px;
-                  font-size: 0.8rem;
-                  max-width: 200px;
-                }
-              }
             }
           }
         }
@@ -503,6 +418,8 @@
     .collection-pagination {
       bottom: 12px;
       gap: 8px;
+      position: absolute;
+      z-index: 1;
     }
   }
 }

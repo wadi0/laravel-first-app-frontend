@@ -23,25 +23,6 @@
     margin-bottom: 60px;
   }
 
-  // Section Headers
-  .section-header {
-    text-align: center;
-    margin-bottom: 40px;
-
-    .section-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #333;
-      margin-bottom: 10px;
-    }
-
-    .section-subtitle {
-      font-size: 1.1rem;
-      color: #666;
-      margin: 0;
-    }
-  }
-
   // Features Section
   .features-section {
     margin-bottom: 80px;
@@ -87,17 +68,6 @@
           line-height: 1.5;
         }
       }
-    }
-  }
-
-  // Collections Section
-  .collections-section {
-    margin-bottom: 80px;
-
-    .collections-wrapper {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
     }
   }
 
@@ -169,12 +139,6 @@
     width: 100%;
     padding: 0 20px;
 
-    .section-header {
-      .section-title {
-        font-size: 2rem;
-      }
-    }
-
     .features-section {
       .features-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -215,11 +179,5 @@
       }
     }
 
-    .collections-section {
-      .collections-wrapper {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-    }
   }
 }
