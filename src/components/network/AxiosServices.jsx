@@ -2,7 +2,8 @@ import axios from 'axios';
 
 // ✅ Create Axios instance
 const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/', // এখানে তোমার API base URL দাও
+  baseURL:  'https://first-e-commerce-api-create-laravel.onrender.com/api/',
+  // 'http://127.0.0.1:8000/api/',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

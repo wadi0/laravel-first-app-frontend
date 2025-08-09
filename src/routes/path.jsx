@@ -1,6 +1,6 @@
 const path = {
-    login: "/login",
-    signup: "/signup",
+    login: "/sign-in",
+    signup: "/sign-up",
     home: "/home",
     product: "product",
 

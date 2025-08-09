@@ -90,23 +90,11 @@ const SignIn = () => {
                                     inputClassName="signin-input"
                                 />
                             </div>
-                            {/*<CustomSelect*/}
-                            {/*    name="country"*/}
-                            {/*    label="Select Country"*/}
-                            {/*    placeholder="Please select your country"*/}
-                            {/*    options={optionsCountry.map((item) => ({*/}
-                            {/*        label: item.label.toUpperCase(),*/}
-                            {/*        value: item.value,*/}
-                            {/*    }))}*/}
-                            {/*/>*/}
-
-
                             <CustomSubmitButton
                                 isLoading={loading}
-                                // onClick={handleSubmit}
                                 type="submit"
-                                label="Login"
-                                btnClassName="login-btn"
+                                label="Sign In"
+                                btnClassName="dedefault-submit-btn login-btn"
                             />
                         </Form>
                     </Formik>

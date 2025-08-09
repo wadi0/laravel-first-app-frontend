@@ -20,6 +20,9 @@ import './navbar.scss';
 import logo from '../../assets/my_logo.png';
 import path from '../../routes/path.jsx';
 import {useApp} from "../context/AppContext.jsx";
+import ApiUrlServices from "../network/ApiUrlServices.jsx";
+import AxiosServices from "../network/AxiosServices.jsx";
+import {toast} from "react-toastify";
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -141,9 +144,21 @@ const Navbar = () => {
     setActiveBottomTab('home');
   };
 
+  const handleLogout = async () => {
+  try {
+    const response = await AxiosServices.post(ApiUrlServices.LOG_OUT);
+      localStorage.removeItem('user');
+      navigate('/login');
+      toast.success("Logout successfully.")
+  } catch (error) {
+    toast.error('Logout error:', error);
+  }
+};
+
+
   const handleUserMenuClick = (item) => {
     if (item.action === 'logout') {
-      console.log('Logging out...');
+      handleLogout();
     } else if (item.path) {
       navigate(item.path);
     }

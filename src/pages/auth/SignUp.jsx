@@ -109,7 +109,7 @@ const SignUp = () => {
                                 // onClick={handleSubmit}
                                 type="submit"
                                 label="Sign Up"
-                                btnClassName="signin-btn"
+                                btnClassName="dedefault-submit-btn signin-btn"
                             />
                         </Form>
                     </Formik>

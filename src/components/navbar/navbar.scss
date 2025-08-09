@@ -20,6 +20,7 @@ $close-btn-color: #dc3545; // Red color for close buttons
 
 // Base Layout
 .main-layout {
+  padding-top: 20px;
   margin-top: $navbar-height;
   min-height: calc(100vh - #{$navbar-height});
 
@@ -278,7 +279,7 @@ $close-btn-color: #dc3545; // Red color for close buttons
       transition: all 0.3s;
 
       @include mobile {
-        right: -15px;
+        right: 5px;
         min-width: 230px;
       }
 
