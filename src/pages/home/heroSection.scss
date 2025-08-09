@@ -69,32 +69,16 @@
             flex-direction: column;
             align-items: center;
 
-            .collection-subtitle {
-              display: inline-block;
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              color: white;
-              padding: 12px 28px;
-              border-radius: 35px;
-              font-size: 0.95rem;
-              font-weight: 600;
-              letter-spacing: 1px;
-              margin-bottom: 30px;
-              text-transform: lowercase;
-              font-style: italic;
-              backdrop-filter: blur(10px);
-              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            }
-
             .collection-title {
-              font-size: 4.5rem;
+              font-size: 50px;
               font-weight: 900;
               color: white;
               line-height: 1.1;
-              margin-bottom: 30px;
               text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.9);
               text-transform: uppercase;
               letter-spacing: 2px;
               text-align: center;
+              margin: 0;
 
               @media (max-width: 768px) {
                 font-size: 3rem;
@@ -106,14 +90,15 @@
             }
 
             .collection-description {
-              font-size: 1.4rem;
+              font-size: 25px;
               color: white;
               line-height: 1.7;
-              margin-bottom: 40px;
               max-width: 650px;
               font-weight: 400;
               text-align: center;
               text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+              margin: 15px 0;
+
 
               @media (max-width: 768px) {
                 font-size: 1.2rem;
@@ -167,7 +152,7 @@
         &::before {
           width: 6px;
           height: 6px;
-          background: #667eea;
+          background: var(--color-primary);
         }
       }
     }
