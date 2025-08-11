@@ -13,9 +13,18 @@
   --bs-body-line-height: 1;
 
   --color-black: black;
+  --overlay-black: rgba(0, 0, 0, 0.6);
+  --text-shadow: rgba(0, 0, 0, 0.9);
+  --shadow-01: rgba(0, 0, 0, 0.1);
   --color-white: #ffffff;
   --color-primary: #1973B1;
   --color-gray: gray;
+  --light-gray: lightgray;
+  --extra-light-gray: #f3f3f3;
+  --primaray-color-gradient: linear-gradient(90deg, #0056b3, #00aaff);
+  --remove-color: #dc3545;
+  --remove-gradient: linear-gradient(90deg, #b02a37, #ff4e4e);
+  --color-666: #666;
 
   --color-text: #3c3849;
   --color-muted: #adabb4;

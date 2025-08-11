@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './featuredProduct.scss';
+import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 
 const FeaturedProducts = () => {
     const [products] = useState([
@@ -116,13 +117,21 @@ const FeaturedProducts = () => {
             {/* Filter Tabs */}
             <div className="filter-tabs">
                 {categories.map(category => (
-                    <button
+                    // <button
+                    //     key={category}
+                    //     className={`filter-tab ${activeFilter === category ? 'active' : ''}`}
+                    //     onClick={() => setActiveFilter(category)}
+                    // >
+                    //     {category}
+                    // </button>
+                    <CustomSubmitButton
                         key={category}
-                        className={`filter-tab ${activeFilter === category ? 'active' : ''}`}
+                        // isLoading={loading && activeFilter === category}
                         onClick={() => setActiveFilter(category)}
-                    >
-                        {category}
-                    </button>
+                        type="button"
+                        label={category}
+                        btnClassName={`filter-tab ${activeFilter === category ? 'active' : ''}`}
+                    />
                 ))}
             </div>
 
