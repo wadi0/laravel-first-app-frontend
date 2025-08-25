@@ -1,6 +1,5 @@
-// CustomSelect.jsx
+// CustomSelect.jsx - Simplified without Formik dependency
 import React from "react";
-import { ErrorMessage, useField, useFormikContext } from "formik";
 import "./customselect.scss";
 
 const CustomSelect = ({
@@ -10,7 +9,7 @@ const CustomSelect = ({
   name,
   value,
   onChange,
-  // New class props
+  // Class props
   selectClassName = "",
   labelClassName = "",
   containerClassName = "",
@@ -20,27 +19,15 @@ const CustomSelect = ({
   required = false,
   id,
   style = {},
+  error = "", // Manual error prop for non-Formik usage
   ...otherProps
 }) => {
-  const formikContext = useFormikContext();
-  const isInsideFormik = !!formikContext;
-
-  let fieldProps = {};
-  let hasError = false;
-
-  if (isInsideFormik) {
-    const [field, meta] = useField(name);
-    fieldProps = {
-      ...field,
-    };
-    hasError = meta.touched && meta.error;
-  } else {
-    fieldProps = {
-      name,
-      value: value || "",
-      onChange,
-    };
-  }
+  // For Product component, we don't need Formik at all
+  const fieldProps = {
+    name,
+    value: value || "",
+    onChange,
+  };
 
   // Default class names
   const defaultContainerClass = "custom-select-container";
@@ -64,6 +51,8 @@ const CustomSelect = ({
   const finalErrorClass = errorClassName
     ? `${defaultErrorClass} ${errorClassName}`
     : defaultErrorClass;
+
+  const hasError = !!error;
 
   return (
     <div
@@ -107,19 +96,10 @@ const CustomSelect = ({
         </div>
       </div>
 
-      {/* Error message for Formik */}
-      {isInsideFormik && (
-        <ErrorMessage
-          name={name}
-          component="div"
-          className={finalErrorClass}
-        />
-      )}
-
-      {/* Error message for non-Formik usage */}
-      {!isInsideFormik && hasError && (
+      {/* Error message */}
+      {hasError && (
         <div className={finalErrorClass}>
-          {hasError}
+          {error}
         </div>
       )}
     </div>
@@ -127,81 +107,3 @@ const CustomSelect = ({
 };
 
 export default CustomSelect;
-
-// import React from "react";
-// import {ErrorMessage, useField, useFormikContext} from "formik";
-// import "./customselect.scss"
-//
-// const CustomSelect = ({ label, options, placeholder = "-- Select --", name, value, onChange }) => {
-//   const formikContext = useFormikContext();
-//   const isInsideFormik = !!formikContext;
-//
-//   let fieldProps = {};
-//   if (isInsideFormik) {
-//     const [field, meta] = useField(name);
-//     fieldProps = {
-//       ...field,
-//     };
-//   } else {
-//     fieldProps = {
-//       name,
-//       value,
-//       onChange,
-//     };
-//   }
-//
-//   return (
-//     <div style={{ marginBottom: "1rem" }}>
-//       {label && <label style={{ display: "block", marginBottom: "4px" }}>{label}</label>}
-//
-//       <select
-//         {...fieldProps}
-//         style={{ padding: "8px", width: "100%" }}
-//       >
-//         <option value="">{placeholder}</option>
-//         {options.map((opt) => (
-//           <option key={opt.value} value={opt.value}>
-//             {opt.label}
-//           </option>
-//         ))}
-//       </select>
-//
-//       {/* Optional: You can show error message if inside Formik */}
-//       {isInsideFormik && (
-//         <ErrorMessage name={name} component="div" style={{ color: "red", fontSize: "0.8em" }} />
-//       )}
-//     </div>
-//   );
-// };
-//
-// export default CustomSelect;
-
-
-
-// import React from "react";
-// import { useField } from "formik";
-//
-// const CustomSelect = ({ label, options, placeholder = "-- Select --", ...props }) => {
-//   const [field, meta] = useField(props);
-//
-//   return (
-//     <div style={{ marginBottom: "1rem" }}>
-//       {label && <label style={{ display: "block", marginBottom: "4px" }}>{label}</label>}
-//
-//       <select {...field} {...props} style={{ padding: "8px", width: "100%" }}>
-//         <option value="">{placeholder}</option>
-//         {options.map((opt) => (
-//           <option key={opt.value} value={opt.value}>
-//             {opt.label}
-//           </option>
-//         ))}
-//       </select>
-//
-//       {meta.touched && meta.error && (
-//         <div style={{ color: "red", fontSize: "0.9em", marginTop: "4px" }}>{meta.error}</div>
-//       )}
-//     </div>
-//   );
-// };
-//
-// export default CustomSelect;

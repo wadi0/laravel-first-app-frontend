@@ -1,5 +1,5 @@
 // context/AppContext.jsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { toast } from "react-toastify";
 import AxiosServices from "../network/AxiosServices.jsx";
 import ApiUrlServices from "../network/ApiUrlServices.jsx";
@@ -27,12 +27,38 @@ export const AppProvider = ({ children }) => {
     const [cartLoading, setCartLoading] = useState(false);
     const [wishlistLoading, setWishlistLoading] = useState(false);
 
+    // Use refs to track ongoing operations and prevent double calls
+    const cartOperations = useRef(new Set());
+    const wishlistOperations = useRef(new Set());
+
     console.log('AppContext - cartItems state:', cartItems); // Debug log
+
+    // Check if user is logged in
+    const isLoggedIn = () => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            return !!user?.token;
+        } catch (error) {
+            console.error('Error checking login status:', error);
+            return false;
+        }
+    };
+
+    // Redirect to login if not authenticated
+    const redirectToLogin = () => {
+        toast.error('Please login first to continue');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1500);
+    };
 
     // ================== CART OPERATIONS ==================
 
     // Get cart items from API
     const getCartItems = async () => {
+        // Only fetch if logged in
+        if (!isLoggedIn()) return;
+
         try {
             setCartLoading(true);
             const res = await AxiosServices.get(ApiUrlServices.ALL_CART_LIST);
@@ -41,6 +67,11 @@ export const AppProvider = ({ children }) => {
             setCartCount(res.data.length);
         } catch (err) {
             console.error('Failed to fetch cart items', err);
+            // If 401, user is not logged in
+            if (err.response?.status === 401) {
+                setCartItems([]);
+                setCartCount(0);
+            }
         } finally {
             setCartLoading(false);
         }
@@ -48,6 +79,22 @@ export const AppProvider = ({ children }) => {
 
     // Add to cart
     const addToCart = async (product) => {
+        // Check authentication first
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return false;
+        }
+
+        const operationKey = `add_${product.id}`;
+
+        // Prevent duplicate calls
+        if (cartOperations.current.has(operationKey)) {
+            console.log('Add to cart operation already in progress for product:', product.id);
+            return false;
+        }
+
+        cartOperations.current.add(operationKey);
+
         let payload = {
             product_id: product.id,
             quantity: 1,
@@ -63,6 +110,7 @@ export const AppProvider = ({ children }) => {
                 if (existingIndex !== -1) {
                     const updated = [...prev];
                     updated[existingIndex] = newCartItem;
+                    setCartCount(updated.length);
                     return updated;
                 } else {
                     const newItems = [...prev, newCartItem];
@@ -71,40 +119,105 @@ export const AppProvider = ({ children }) => {
                 }
             });
 
+            // toast.success("Product added to cart successfully!");
             return true;
         } catch (err) {
             console.error("Add to cart failed:", err);
+            if (err.response?.status === 401) {
+                redirectToLogin();
+            } else {
+                // toast.error("Failed to add product to cart");
+            }
             return false;
+        } finally {
+            cartOperations.current.delete(operationKey);
         }
     };
 
     // Remove from cart
     const removeFromCart = async (product) => {
+        // Check authentication first
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return false;
+        }
+
+        const operationKey = `remove_${product.id}`;
+
+        // Prevent duplicate calls
+        if (cartOperations.current.has(operationKey)) {
+            console.log('Remove from cart operation already in progress for product:', product.id);
+            return false;
+        }
+
+        cartOperations.current.add(operationKey);
+
         try {
-            const cartItem = cartItems.find(item => item.product_id === product.id);
+            // Get fresh cart items to ensure we have the latest data
+            const currentCartItems = cartItems || [];
+            const cartItem = currentCartItems.find(item => item.product_id === product.id);
 
             if (!cartItem) {
+                console.warn("Item not found in cart for product:", product.id);
+                // Don't show error toast, just return false
                 return false;
             }
 
+            console.log('Removing cart item:', cartItem.id, 'for product:', product.id);
+
+            // Make API call to remove from cart
             await AxiosServices.delete(ApiUrlServices.DELETE_CART(cartItem.id));
 
+            // Update local state only after successful API call
             setCartItems(prev => {
                 const filtered = prev.filter(item => item.id !== cartItem.id);
+                console.log('Cart items after removal:', filtered.length);
                 setCartCount(filtered.length);
                 return filtered;
             });
 
+            // Don't show success toast here - let the calling component handle it
             return true;
         } catch (err) {
             console.error("Remove from cart failed:", err);
+            if (err.response?.status === 401) {
+                redirectToLogin();
+            } else if (err.response?.status === 404) {
+                // Item already removed, just update local state
+                setCartItems(prev => {
+                    const filtered = prev.filter(item => item.product_id !== product.id);
+                    setCartCount(filtered.length);
+                    return filtered;
+                });
+                return true;
+            } else {
+                toast.error("Failed to remove item from cart");
+            }
             return false;
+        } finally {
+            cartOperations.current.delete(operationKey);
         }
     };
 
     // Update cart quantity
     const updateCartQuantity = async (product, newQuantity) => {
+        // Check authentication first
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return false;
+        }
+
         if (newQuantity < 1) return false;
+
+        const operationKey = `update_${product.id}`;
+
+        // Prevent duplicate calls
+        if (cartOperations.current.has(operationKey)) {
+            console.log('Update cart operation already in progress for product:', product.id);
+            return false;
+        }
+
+        cartOperations.current.add(operationKey);
 
         try {
             const cartItem = cartItems.find(item => item.product_id === product.id);
@@ -145,11 +258,15 @@ export const AppProvider = ({ children }) => {
                 toast.error(err.response.data.message || "Stock limited");
             } else if (err.response?.status === 404) {
                 toast.error("Cart item not found");
+            } else if (err.response?.status === 401) {
+                redirectToLogin();
             } else {
                 toast.error("Failed to update quantity");
             }
 
             return false;
+        } finally {
+            cartOperations.current.delete(operationKey);
         }
     };
 
@@ -162,6 +279,9 @@ export const AppProvider = ({ children }) => {
 
     // Get wishlist items from API
     const getWishlistItems = async () => {
+        // Only fetch if logged in
+        if (!isLoggedIn()) return;
+
         try {
             setWishlistLoading(true);
             const res = await AxiosServices.get(ApiUrlServices.ALL_WISHLIST_LIST);
@@ -170,6 +290,11 @@ export const AppProvider = ({ children }) => {
             setWishlistCount(res.data.length);
         } catch (err) {
             console.error('Failed to fetch wishlist items', err);
+            // If 401, user is not logged in
+            if (err.response?.status === 401) {
+                setWishlistItems([]);
+                setWishlistCount(0);
+            }
         } finally {
             setWishlistLoading(false);
         }
@@ -177,6 +302,22 @@ export const AppProvider = ({ children }) => {
 
     // Add to wishlist
     const addToWishlist = async (product) => {
+        // Check authentication first
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return false;
+        }
+
+        const operationKey = `add_wishlist_${product.id}`;
+
+        // Prevent duplicate calls
+        if (wishlistOperations.current.has(operationKey)) {
+            console.log('Add to wishlist operation already in progress for product:', product.id);
+            return false;
+        }
+
+        wishlistOperations.current.add(operationKey);
+
         let payload = {
             product_id: product.id,
         }
@@ -199,12 +340,35 @@ export const AppProvider = ({ children }) => {
             return true;
         } catch (err) {
             console.error("Add to wishlist failed:", err);
+            if (err.response?.status === 401) {
+                redirectToLogin();
+            } else {
+                toast.error("Failed to add to wishlist");
+            }
             return false;
+        } finally {
+            wishlistOperations.current.delete(operationKey);
         }
     };
 
     // Remove from wishlist
     const removeFromWishlist = async (product) => {
+        // Check authentication first
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return false;
+        }
+
+        const operationKey = `remove_wishlist_${product.id}`;
+
+        // Prevent duplicate calls
+        if (wishlistOperations.current.has(operationKey)) {
+            console.log('Remove from wishlist operation already in progress for product:', product.id);
+            return false;
+        }
+
+        wishlistOperations.current.add(operationKey);
+
         try {
             const wishlistItem = wishlistItems.find(item => item.product_id === product.id);
 
@@ -223,28 +387,37 @@ export const AppProvider = ({ children }) => {
             return true;
         } catch (err) {
             console.error("Remove from wishlist failed:", err);
+            if (err.response?.status === 401) {
+                redirectToLogin();
+            } else {
+                toast.error("Failed to remove from wishlist");
+            }
             return false;
+        } finally {
+            wishlistOperations.current.delete(operationKey);
         }
     };
 
     // Toggle wishlist (add if not exists, remove if exists)
     const toggleWishlist = async (product) => {
+        // Check authentication first
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return { success: false, action: 'authentication_required', isWishlisted: false };
+        }
+
         const exists = wishlistItems.find(item => item.product_id === product.id);
 
         if (exists) {
             const success = await removeFromWishlist(product);
             if (success) {
                 toast.success("Removed from wishlist!");
-            } else {
-                toast.error("Failed to remove from wishlist");
             }
             return { success, action: 'removed', isWishlisted: false };
         } else {
             const success = await addToWishlist(product);
             if (success) {
                 toast.success("Added to wishlist!");
-            } else {
-                toast.error("Failed to add to wishlist");
             }
             return { success, action: 'added', isWishlisted: true };
         }
@@ -258,8 +431,11 @@ export const AppProvider = ({ children }) => {
     // ================== INITIAL LOAD ==================
 
     useEffect(() => {
-        getCartItems();
-        getWishlistItems();
+        // Only fetch data if user is logged in
+        if (isLoggedIn()) {
+            getCartItems();
+            getWishlistItems();
+        }
     }, []);
 
     // ================== CONTEXT VALUE ==================
@@ -284,6 +460,9 @@ export const AppProvider = ({ children }) => {
         toggleWishlist,
         getWishlistItems,
         isInWishlist,
+
+        // Auth utilities
+        isLoggedIn,
     };
 
     return (

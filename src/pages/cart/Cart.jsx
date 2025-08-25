@@ -1,5 +1,5 @@
 // pages/cart/Cart.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FaShoppingCart, FaTrash, FaHeart, FaMinus, FaPlus } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import './cart.scss';
@@ -18,55 +18,95 @@ const Cart = () => {
     } = useApp();
 
     const [loading, setLoading] = useState({});
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false); // Prevent multiple initial loads
 
+    // Only load cart once when component mounts
     useEffect(() => {
-        getCartItems(); // Page load এ cart refresh করুন
-    }, []);
-
-    const handleRemoveFromCart = async (product) => {
-        setLoading(prev => ({...prev, [`cart-${product.id}`]: true}));
-        const success = await removeFromCart(product);
-        if (!success) {
-            // Error handling already done in context
+        if (!hasLoadedOnce) {
+            getCartItems();
+            setHasLoadedOnce(true);
         }
-        setLoading(prev => ({...prev, [`cart-${product.id}`]: false}));
-    };
+    }, []); // Empty dependency array - only run once
 
-    const handleAddToWishlist = async (product) => {
+    const handleRemoveFromCart = useCallback(async (product) => {
+        if (!product || loading[`cart-${product.id}`]) return; // Prevent duplicate calls
+
+        setLoading(prev => ({...prev, [`cart-${product.id}`]: true}));
+        try {
+            const success = await removeFromCart(product);
+            if (!success) {
+                // Error handling already done in context
+            }
+        } catch (error) {
+            console.error('Remove from cart error:', error);
+        } finally {
+            setLoading(prev => ({...prev, [`cart-${product.id}`]: false}));
+        }
+    }, [removeFromCart, loading]);
+
+    const handleAddToWishlist = useCallback(async (product) => {
+        if (!product || loading[`wishlist-${product.id}`]) return; // Prevent duplicate calls
+
         setLoading(prev => ({...prev, [`wishlist-${product.id}`]: true}));
-        const success = await addToWishlist(product);
-        setLoading(prev => ({...prev, [`wishlist-${product.id}`]: false}));
-        return success;
-    };
+        try {
+            const success = await addToWishlist(product);
+            return success;
+        } catch (error) {
+            console.error('Add to wishlist error:', error);
+            return false;
+        } finally {
+            setLoading(prev => ({...prev, [`wishlist-${product.id}`]: false}));
+        }
+    }, [addToWishlist, loading]);
 
-    const handleQuantityUpdate = async (product, newQuantity) => {
-        if (newQuantity < 1) return;
+    const handleQuantityUpdate = useCallback(async (product, newQuantity) => {
+        if (!product || newQuantity < 1 || loading[`quantity-${product.id}`]) return;
 
         setLoading(prev => ({...prev, [`quantity-${product.id}`]: true}));
-        const success = await updateCartQuantity(product, newQuantity);
-        if (!success) {
-            // Error toast already shown in context
+        try {
+            const success = await updateCartQuantity(product, newQuantity);
+            if (!success) {
+                // Error toast already shown in context
+            }
+        } catch (error) {
+            console.error('Update quantity error:', error);
+        } finally {
+            setLoading(prev => ({...prev, [`quantity-${product.id}`]: false}));
         }
-        setLoading(prev => ({...prev, [`quantity-${product.id}`]: false}));
-    };
+    }, [updateCartQuantity, loading]);
 
-    const formatPrice = (price) => {
+    const formatPrice = useCallback((price) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD'
         }).format(price);
-    };
+    }, []);
 
-    // Calculate totals
-    const subtotal = cartItems.reduce((total, item) => {
-        return total + (item.product?.price * (item.quantity || 1));
-    }, 0);
+    // Get proper image URL
+    const getImageUrl = useCallback((imageUrl) => {
+        if (!imageUrl || imageUrl.trim() === '') {
+            return '/placeholder-image.png';
+        }
+        if (imageUrl.startsWith('http')) {
+            return imageUrl;
+        }
+        return `http://localhost:8000/storage/${imageUrl}`;
+    }, []);
 
-    const shipping = subtotal > 50 ? 0 : 10; // Free shipping over $50
-    const tax = subtotal * 0.08; // 8% tax
-    const total = subtotal + shipping + tax;
+    // Memoize calculations to prevent unnecessary recalculations
+    const calculations = React.useMemo(() => {
+        const subtotal = (cartItems || []).reduce((total, item) => {
+            return total + ((item.product?.price || 0) * (item.quantity || 1));
+        }, 0);
 
-    if (cartLoading) {
+        const shipping = subtotal > 50 ? 0 : 10; // Free shipping over $50
+        const tax = subtotal * 0.08; // 8% tax
+        const total = subtotal + shipping + tax;
+
+        return { subtotal, shipping, tax, total };
+    }, [cartItems]);
+
+    if (cartLoading && !hasLoadedOnce) {
         return (
             <div className="cart-page">
                 <div className="container">
@@ -79,6 +119,8 @@ const Cart = () => {
         );
     }
 
+    const cartItemsArray = cartItems || []; // Safe fallback
+
     return (
         <div className="cart-page">
             <div className="container">
@@ -88,11 +130,11 @@ const Cart = () => {
                         Shopping Cart
                     </h1>
                     <p className="cart-count">
-                        {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
+                        {cartItemsArray.length} {cartItemsArray.length === 1 ? 'item' : 'items'} in your cart
                     </p>
                 </div>
 
-                {cartItems.length === 0 ? (
+                {cartItemsArray.length === 0 ? (
                     <div className="empty-cart">
                         <div className="empty-icon">
                             <FaShoppingCart />
@@ -110,77 +152,85 @@ const Cart = () => {
                 ) : (
                     <div className="cart-content">
                         <div className="cart-items">
-                            {cartItems.map((item) => (
-                                <div key={item.id} className="cart-item">
-                                    <div className="item-image">
-                                        <img
-                                            src={item.product?.image
-                                                ? `http://localhost:8000/storage/${item.product.image}`
-                                                : '/placeholder-image.png'
-                                            }
-                                            alt={item.product?.name}
-                                            onError={(e) => {
-                                                e.target.src = '/placeholder-image.png';
-                                            }}
-                                        />
-                                    </div>
+                            {cartItemsArray.map((item) => {
+                                if (!item || !item.product) {
+                                    console.warn('Invalid cart item:', item);
+                                    return null;
+                                }
 
-                                    <div className="item-details">
-                                        <h3 className="item-name">{item.product?.name}</h3>
-                                        <p className="item-description">{item.product?.description}</p>
-                                        <div className="item-price">{formatPrice(item.product?.price)}</div>
-                                    </div>
+                                return (
+                                    <div key={`cart-item-${item.id}`} className="cart-item">
+                                        <div className="item-image">
+                                            <img
+                                                src={getImageUrl(item.product.image)}
+                                                alt={item.product.name || 'Product'}
+                                                onError={(e) => {
+                                                    e.target.src = '/placeholder-image.png';
+                                                }}
+                                            />
+                                        </div>
 
-                                    <div className="item-quantity">
-                                        <label>Quantity:</label>
-                                        <div className="quantity-controls">
+                                        <div className="item-details">
+                                            <h3 className="item-name">{item.product.name || 'Unknown Product'}</h3>
+                                            <p className="item-description">{item.product.description || 'No description'}</p>
+                                            <div className="item-price">{formatPrice(item.product.price || 0)}</div>
+                                        </div>
+
+                                        <div className="item-quantity">
+                                            <label>Quantity:</label>
+                                            <div className="quantity-controls">
+                                                <button
+                                                    className="qty-btn"
+                                                    onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) - 1)}
+                                                    disabled={loading[`quantity-${item.product.id}`] || (item.quantity || 1) <= 1}
+                                                    aria-label="Decrease quantity"
+                                                >
+                                                    <FaMinus />
+                                                </button>
+                                                <span className="quantity">{item.quantity || 1}</span>
+                                                <button
+                                                    className="qty-btn"
+                                                    onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) + 1)}
+                                                    disabled={loading[`quantity-${item.product.id}`]}
+                                                    aria-label="Increase quantity"
+                                                >
+                                                    <FaPlus />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="item-total">
+                                            <div className="total-price">
+                                                {formatPrice((item.product.price || 0) * (item.quantity || 1))}
+                                            </div>
+                                        </div>
+
+                                        <div className="item-actions">
+                                            {!isInWishlist(item.product.id) && (
+                                                <button
+                                                    className="action-btn wishlist-btn"
+                                                    onClick={() => handleAddToWishlist(item.product)}
+                                                    disabled={loading[`wishlist-${item.product.id}`]}
+                                                    title="Move to Wishlist"
+                                                    aria-label="Add to wishlist"
+                                                >
+                                                    <FaHeart />
+                                                </button>
+                                            )}
+
                                             <button
-                                                className="qty-btn"
-                                                onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) - 1)}
-                                                disabled={loading[`quantity-${item.product.id}`] || (item.quantity || 1) <= 1}
+                                                className="action-btn remove-btn"
+                                                onClick={() => handleRemoveFromCart(item.product)}
+                                                disabled={loading[`cart-${item.product.id}`]}
+                                                title="Remove from Cart"
+                                                aria-label="Remove from cart"
                                             >
-                                                <FaMinus />
-                                            </button>
-                                            <span className="quantity">{item.quantity || 1}</span>
-                                            <button
-                                                className="qty-btn"
-                                                onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) + 1)}
-                                                disabled={loading[`quantity-${item.product.id}`]}
-                                            >
-                                                <FaPlus />
+                                                <FaTrash />
                                             </button>
                                         </div>
                                     </div>
-
-                                    <div className="item-total">
-                                        <div className="total-price">
-                                            {formatPrice(item.product?.price * (item.quantity || 1))}
-                                        </div>
-                                    </div>
-
-                                    <div className="item-actions">
-                                        {!isInWishlist(item.product.id) && (
-                                            <button
-                                                className="action-btn wishlist-btn"
-                                                onClick={() => handleAddToWishlist(item.product)}
-                                                disabled={loading[`wishlist-${item.product.id}`]}
-                                                title="Move to Wishlist"
-                                            >
-                                                <FaHeart />
-                                            </button>
-                                        )}
-
-                                        <button
-                                            className="action-btn remove-btn"
-                                            onClick={() => handleRemoveFromCart(item.product)}
-                                            disabled={loading[`cart-${item.product.id}`]}
-                                            title="Remove from Cart"
-                                        >
-                                            <FaTrash />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         <div className="cart-summary">
@@ -189,29 +239,29 @@ const Cart = () => {
 
                                 <div className="summary-row">
                                     <span>Subtotal:</span>
-                                    <span>{formatPrice(subtotal)}</span>
+                                    <span>{formatPrice(calculations.subtotal)}</span>
                                 </div>
 
                                 <div className="summary-row">
                                     <span>Shipping:</span>
-                                    <span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
+                                    <span>{calculations.shipping === 0 ? 'Free' : formatPrice(calculations.shipping)}</span>
                                 </div>
 
                                 <div className="summary-row">
                                     <span>Tax:</span>
-                                    <span>{formatPrice(tax)}</span>
+                                    <span>{formatPrice(calculations.tax)}</span>
                                 </div>
 
                                 <div className="summary-divider"></div>
 
                                 <div className="summary-row total">
                                     <span>Total:</span>
-                                    <span>{formatPrice(total)}</span>
+                                    <span>{formatPrice(calculations.total)}</span>
                                 </div>
 
-                                {shipping > 0 && (
+                                {calculations.shipping > 0 && (
                                     <div className="free-shipping-notice">
-                                        Add {formatPrice(50 - subtotal)} more for free shipping!
+                                        Add {formatPrice(50 - calculations.subtotal)} more for free shipping!
                                     </div>
                                 )}
 

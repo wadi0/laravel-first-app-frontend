@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import AxiosServices from "../../components/network/AxiosServices.jsx";
 import ApiUrlServices from "../../components/network/ApiUrlServices.jsx";
 import "./product.scss";
@@ -45,9 +45,18 @@ const Product = () => {
         const fetchCategories = async () => {
             try {
                 const res = await AxiosServices.get(ApiUrlServices.All_CATEGORIES_LIST);
-                setCategoryList(res.data);
+                console.log('Full API Response:', res.data);
+
+                // Extract actual categories array
+                const categories = res.data.data.data || [];
+
+                console.log('Extracted categories:', categories);
+                setCategoryList(categories);
             } catch (error) {
                 console.error('Error fetching categories:', error);
+                if (error.response?.status !== 401) {
+                    toast.error('Failed to load categories');
+                }
             }
         };
         fetchCategories();
@@ -55,11 +64,14 @@ const Product = () => {
 
     // Fetch products when page or category changes
     useEffect(() => {
+        console.log('useEffect triggered - currentPage:', currentPage, 'selectedCategory:', selectedCategory, 'itemsPerPage:', itemsPerPage);
         getAllProductList();
     }, [currentPage, selectedCategory, itemsPerPage]);
 
     // API call with pagination parameters
     const getAllProductList = async () => {
+        console.log('getAllProductList called');
+        console.log('Current selectedCategory:', selectedCategory);
         setLoading(true);
         try {
             // Build query parameters
@@ -70,58 +82,94 @@ const Product = () => {
 
             // Add category filter if selected
             if (selectedCategory) {
+                console.log('Adding category filter:', selectedCategory);
                 params.append('category_id', selectedCategory);
             }
 
-            const res = await AxiosServices.get(`${ApiUrlServices.ALL_PRODUCT_LIST}?${params}`);
+            const apiUrl = `${ApiUrlServices.ALL_PRODUCT_LIST}?${params}`;
+            console.log('Final API URL:', apiUrl);
+
+            const res = await AxiosServices.get(apiUrl);
             console.log('API Response:', res.data);
+            console.log('Products returned:', res.data.data.length);
 
             // Laravel pagination response structure
             setProductList(res.data.data); // Current page products
             setFilteredProducts(res.data.data); // For display
             setTotalPages(res.data.last_page); // Total pages
             setTotalItems(res.data.total); // Total items
-            setCurrentPage(res.data.current_page); // Current page from API
 
         } catch (err) {
             console.error('Error fetching products:', err);
-            toast.error('Failed to load products');
+            // If not authentication error, show toast
+            if (err.response?.status !== 401) {
+                toast.error('Failed to load products');
+            }
         } finally {
             setLoading(false);
         }
     };
 
     const handleCategoryChange = (e) => {
+        console.log('Category changed to:', e.target.value);
         setSelectedCategory(e.target.value);
         setCurrentPage(1); // Reset to first page when filtering
     };
 
-    // Cart operations with toast messages
-    const handleAddToCart = async (product) => {
-        const success = await addToCart(product);
-        if (success) {
-            toast.success("Product added to cart!");
-        } else {
-            toast.error("Add to cart failed");
+    // Cart operations with authentication check and toast messages
+    // Use useCallback to prevent re-creation on every render
+    const handleAddToCart = useCallback(async (product) => {
+        try {
+            const success = await addToCart(product);
+            if (success) {
+                toast.success("Product added to cart!");
+                // Refresh the product list to ensure UI consistency
+                // But don't await it to avoid blocking the UI
+                setTimeout(() => {
+                    // Force a re-render by updating a state that doesn't affect the API call
+                    setProductList(prev => [...prev]);
+                }, 100);
+            }
+            return success;
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            return false;
         }
-        return success;
-    };
+    }, [addToCart]);
 
-    const handleRemoveFromCart = async (product) => {
-        const success = await removeFromCart(product);
-        if (success) {
-            toast.success("Remove from cart successfully!");
-        } else {
-            toast.error("Remove from cart failed");
+    const handleRemoveFromCart = useCallback(async (product) => {
+        try {
+            const success = await removeFromCart(product);
+            if (success) {
+                toast.success("Remove from cart successfully!");
+                // Force a re-render to ensure UI consistency
+                setTimeout(() => {
+                    setProductList(prev => [...prev]);
+                }, 100);
+            }
+            return success;
+        } catch (error) {
+            console.error('Remove from cart error:', error);
+            return false;
         }
-        return success;
-    };
+    }, [removeFromCart]);
 
-    // Wishlist operations
-    const handleWishlist = async (product) => {
-        const result = await toggleWishlist(product);
-        return result.success;
-    };
+    // Wishlist operations with authentication check
+    const handleWishlist = useCallback(async (product) => {
+        try {
+            const result = await toggleWishlist(product);
+            // Force a re-render to ensure UI consistency
+            if (result.success) {
+                setTimeout(() => {
+                    setProductList(prev => [...prev]);
+                }, 100);
+            }
+            return result.success;
+        } catch (error) {
+            console.error('Wishlist error:', error);
+            return false;
+        }
+    }, [toggleWishlist]);
 
     // Handle pagination change using CustomPagination
     const handlePageChange = (event, page) => {
@@ -135,13 +183,20 @@ const Product = () => {
         setCurrentPage(1); // Reset to first page
     };
 
+    // Extract categories array - safe handling
+    const categoriesArray = Array.isArray(categoryList) ? categoryList : [];
+
     const categoryOptions = [
         {label: 'All Categories', value: ''},
-        ...categoryList.map((item) => ({
-            label: item.name.toUpperCase(),
+        ...categoriesArray.map((item) => ({
+            label: item.category_name?.toUpperCase() || 'Unknown',
             value: item.id,
         }))
     ];
+
+    console.log('categoryList:', categoryList);
+    console.log('categoriesArray:', categoriesArray);
+    console.log('categoryOptions:', categoryOptions);
 
     return (
         <div className="product-wrapper">
@@ -165,21 +220,13 @@ const Product = () => {
                                 Showing {filteredProducts.length} of {totalItems} products
                                 {selectedCategory && (
                                     <span className="category-filter">
-                                        {' '}in {categoryList.find(cat => cat.id === parseInt(selectedCategory))?.name}
+                                        {' '}in {categoriesArray.find(cat => cat.id === parseInt(selectedCategory))?.category_name || 'Selected Category'}
                                     </span>
                                 )}
                             </span>
                         </div>
                     )}
                 </div>
-
-                {/*<CustomSubmitButton*/}
-                {/*    isLoading={loading}*/}
-                {/*    onClick={toggleModal}*/}
-                {/*    type="button"*/}
-                {/*    label="+ Add Product"*/}
-                {/*    btnClassName="default-submit-btn"*/}
-                {/*/>*/}
             </div>
 
             {loading ? (
@@ -218,7 +265,7 @@ const Product = () => {
                     <div className="product-container">
                         {filteredProducts.map((product) => (
                             <ProductCard
-                                key={product.id}
+                                key={`product-${product.id}-${cartItems.length}-${Date.now()}`} // Force re-render with timestamp
                                 product={product}
                                 cartItems={cartItems || []}
                                 onAddToCart={handleAddToCart}
@@ -263,7 +310,7 @@ const Product = () => {
                         getAllProductList();
                         toggleModal();
                     }}
-                    categoryList={categoryList}
+                    categoryList={categoriesArray}
                 />
             </CustomModal>
         </div>

@@ -1,20 +1,23 @@
 // pages/wishlist/Wishlist.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FaHeart } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import './wishlist.scss';
 import {useApp} from "../../components/context/AppContext.jsx";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import ProductCard from "../product/ProductCard.jsx";
+import {toast} from "react-toastify";
 
 const Wishlist = () => {
     const {
         wishlistItems,
         wishlistLoading,
         addToCart,
+        removeFromCart, // removeFromCart function import করুন
         cartItems, // cartItems properly destructure করুন
         toggleWishlist,
-        getWishlistItems
+        getWishlistItems,
+        getCartItems // Cart items refresh করার জন্য
     } = useApp();
 
     // Debug করার জন্য
@@ -23,17 +26,58 @@ const Wishlist = () => {
 
     useEffect(() => {
         getWishlistItems(); // Page load এ wishlist refresh করুন
+        getCartItems(); // Cart items o refresh করুন
     }, []);
 
-    const handleAddToCart = async (product) => {
-        const success = await addToCart(product);
-        return success;
-    };
+    const handleAddToCart = useCallback(async (product) => {
+        try {
+            const success = await addToCart(product);
+            if (success) {
+                toast.success("Product added to cart!");
+                // Force refresh to ensure UI consistency
+                setTimeout(() => {
+                    getCartItems();
+                }, 100);
+            }
+            return success;
+        } catch (error) {
+            console.error('Add to cart error in wishlist:', error);
+            return false;
+        }
+    }, [addToCart, getCartItems]);
 
-    const handleRemoveFromWishlist = async (product) => {
-        const result = await toggleWishlist(product);
-        return result.success;
-    };
+    const handleRemoveFromCart = useCallback(async (product) => {
+        try {
+            const success = await removeFromCart(product);
+            if (success) {
+                toast.success("Removed from cart successfully!");
+                // Force refresh to ensure UI consistency
+                setTimeout(() => {
+                    getCartItems();
+                }, 100);
+            }
+            return success;
+        } catch (error) {
+            console.error('Remove from cart error in wishlist:', error);
+            return false;
+        }
+    }, [removeFromCart, getCartItems]);
+
+    const handleRemoveFromWishlist = useCallback(async (product) => {
+        try {
+            const result = await toggleWishlist(product);
+            if (result.success) {
+                // Force refresh wishlist to ensure UI consistency
+                setTimeout(() => {
+                    getWishlistItems();
+                }, 100);
+            }
+            return result.success;
+        } catch (error) {
+            console.error('Remove from wishlist error:', error);
+            return false;
+        }
+    }, [toggleWishlist, getWishlistItems]);
 
     if (wishlistLoading) {
         return (
@@ -87,11 +131,11 @@ const Wishlist = () => {
 
                             return (
                                 <ProductCard
-                                    key={item.id}
+                                    key={`wishlist-${item.id}-${cartItems?.length || 0}`} // Better key for re-rendering
                                     product={item.product}
                                     cartItems={cartItems || []} // Fallback empty array
                                     onAddToCart={handleAddToCart}
-                                    onRemoveFromCart={() => {}} // Cart থেকে remove করার দরকার নেই wishlist page এ
+                                    onRemoveFromCart={handleRemoveFromCart} // Proper removeFromCart function pass করুন
                                     onWishlist={handleRemoveFromWishlist}
                                     showEditDelete={false} // Edit/Delete buttons show করবো না
                                 />
