@@ -222,7 +222,20 @@ const Navbar = () => {
             {!searchActive ? (
               <>
                 <FaSearch className="icon desktop-only" onClick={() => setSearchActive(true)} />
-
+                <Link to={path.wishlist} className="desktop-only">
+                  <IconWithBadge
+                    icon={FaHeart}
+                    count={wishlistCount}
+                    className="icon"
+                  />
+                </Link>
+                <Link to={path.cart} className="desktop-only">
+                  <IconWithBadge
+                    icon={FaShoppingCart}
+                    count={cartCount} // Dynamic cart count
+                    className="icon"
+                  />
+                </Link>
                 <div
                   className="user-profile-wrapper"
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
@@ -262,21 +275,6 @@ const Navbar = () => {
                     </div>
                   )}
                 </div>
-
-                <Link to={path.wishlist} className="desktop-only">
-                  <IconWithBadge
-                    icon={FaHeart}
-                    count={wishlistCount}
-                    className="icon"
-                  />
-                </Link>
-                <Link to={path.cart} className="desktop-only">
-                  <IconWithBadge
-                    icon={FaShoppingCart}
-                    count={cartCount} // Dynamic cart count
-                    className="icon"
-                  />
-                </Link>
               </>
             ) : (
               <div className="search-box">

@@ -64,10 +64,6 @@ const Home = () => {
 
             {/* Featured Products Section */}
             <section className="featured-products-section">
-                <div className="section-header">
-                    <h2 className="section-title">Featured Products</h2>
-                    <p className="section-subtitle">Our most popular items</p>
-                </div>
                 <FeaturedProducts />
             </section>
 
