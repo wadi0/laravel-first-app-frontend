@@ -422,7 +422,8 @@ $close-btn-color: #dc3545; // Red color for close buttons
     margin: 0 20px;
     padding: 0 12px;
     overflow: hidden;
-    gap: 8px; // Add gap between elements
+    gap: 8px;
+    max-width: 1200px;
 
     @include mobile {
       width: calc(100% - 30px);

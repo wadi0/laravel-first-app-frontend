@@ -19,6 +19,7 @@ const Product = () => {
     const [categoryList, setCategoryList] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [loading, setLoading] = useState(false);
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     // API Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -41,67 +42,72 @@ const Product = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const res = await AxiosServices.get(ApiUrlServices.All_CATEGORIES_LIST);
-                console.log('Full API Response:', res.data);
+    // ✅ সব categories একসাথে fetch করার function (কোনো limit ছাড়া)
+    const fetchAllCategories = async () => {
+        try {
+            setCategoriesLoading(true);
+            let allCategories = [];
+            let currentPage = 1;
+            let hasMorePages = true;
 
-                // Extract actual categories array
-                const categories = res.data.data.data || [];
+            console.log('🔄 Starting to fetch ALL categories...');
 
-                console.log('Extracted categories:', categories);
-                setCategoryList(categories);
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-                if (error.response?.status !== 401) {
-                    toast.error('Failed to load categories');
-                }
+            // যত pages লাগুক সব categories নিয়ে আসব
+            while (hasMorePages) {
+                const params = new URLSearchParams({
+                    page: currentPage.toString(),
+                    per_page: '100' // Maximum per page যা API support করে
+                });
+
+                const apiUrl = `${ApiUrlServices.All_CATEGORIES_LIST}?${params}`;
+
+                const res = await AxiosServices.get(apiUrl);
+
+                const categoriesData = res.data.data.data || [];
+                const currentPageNum = res.data.data.current_page;
+                const lastPage = res.data.data.last_page;
+                const total = res.data.data.total;
+                allCategories = [...allCategories, ...categoriesData];
+                hasMorePages = currentPage < lastPage;
+                currentPage++;
             }
-        };
-        fetchCategories();
-    }, []);
+            setCategoryList(allCategories);
+            toast.success('Categories loaded successfully!');
 
-    // Fetch products when page or category changes
-    useEffect(() => {
-        console.log('useEffect triggered - currentPage:', currentPage, 'selectedCategory:', selectedCategory, 'itemsPerPage:', itemsPerPage);
-        getAllProductList();
-    }, [currentPage, selectedCategory, itemsPerPage]);
+        } catch (error) {
+            toast.error('Failed to load categories');
+            setCategoryList([]);
+        } finally {
+            setCategoriesLoading(false);
+        }
+    };
 
-    // API call with pagination parameters
     const getAllProductList = async () => {
-        console.log('getAllProductList called');
-        console.log('Current selectedCategory:', selectedCategory);
         setLoading(true);
         try {
-            // Build query parameters
+            // Query parameters build করি
             const params = new URLSearchParams({
                 page: currentPage.toString(),
                 per_page: itemsPerPage.toString()
             });
 
-            // Add category filter if selected
+            // Category filter add করি যদি select করা থাকে
             if (selectedCategory) {
-                console.log('Adding category filter:', selectedCategory);
                 params.append('category_id', selectedCategory);
             }
 
             const apiUrl = `${ApiUrlServices.ALL_PRODUCT_LIST}?${params}`;
-            console.log('Final API URL:', apiUrl);
 
             const res = await AxiosServices.get(apiUrl);
-            console.log('API Response:', res.data);
-            console.log('Products returned:', res.data.data.length);
 
             // Laravel pagination response structure
             setProductList(res.data.data); // Current page products
             setFilteredProducts(res.data.data); // For display
             setTotalPages(res.data.last_page); // Total pages
             setTotalItems(res.data.total); // Total items
+            toast.success('Product loaded successfully!');
 
         } catch (err) {
-            console.error('Error fetching products:', err);
-            // If not authentication error, show toast
             if (err.response?.status !== 401) {
                 toast.error('Failed to load products');
             }
@@ -110,29 +116,35 @@ const Product = () => {
         }
     };
 
+    // ✅ শুধুমাত্র একবার categories load করি component mount এ
+    useEffect(() => {
+        fetchAllCategories();
+    }, []); // শুধুমাত্র component mount এ একবার
+
+    // ✅ Products fetch করার useEffect (pagination সহ)
+    useEffect(() => {
+        getAllProductList();
+    }, [currentPage, selectedCategory, itemsPerPage]);
+
+    // Category change handler
     const handleCategoryChange = (e) => {
-        console.log('Category changed to:', e.target.value);
         setSelectedCategory(e.target.value);
-        setCurrentPage(1); // Reset to first page when filtering
+        setCurrentPage(1); // Filter করার সময় first page এ যাই
     };
 
-    // Cart operations with authentication check and toast messages
-    // Use useCallback to prevent re-creation on every render
+    // Cart operations
     const handleAddToCart = useCallback(async (product) => {
         try {
             const success = await addToCart(product);
             if (success) {
                 toast.success("Product added to cart!");
-                // Refresh the product list to ensure UI consistency
-                // But don't await it to avoid blocking the UI
                 setTimeout(() => {
-                    // Force a re-render by updating a state that doesn't affect the API call
                     setProductList(prev => [...prev]);
                 }, 100);
             }
             return success;
         } catch (error) {
-            console.error('Add to cart error:', error);
+            toast.error("Something went wrong!");
             return false;
         }
     }, [addToCart]);
@@ -142,7 +154,6 @@ const Product = () => {
             const success = await removeFromCart(product);
             if (success) {
                 toast.success("Remove from cart successfully!");
-                // Force a re-render to ensure UI consistency
                 setTimeout(() => {
                     setProductList(prev => [...prev]);
                 }, 100);
@@ -154,11 +165,9 @@ const Product = () => {
         }
     }, [removeFromCart]);
 
-    // Wishlist operations with authentication check
     const handleWishlist = useCallback(async (product) => {
         try {
             const result = await toggleWishlist(product);
-            // Force a re-render to ensure UI consistency
             if (result.success) {
                 setTimeout(() => {
                     setProductList(prev => [...prev]);
@@ -171,56 +180,53 @@ const Product = () => {
         }
     }, [toggleWishlist]);
 
-    // Handle pagination change using CustomPagination
+    // Pagination handlers
     const handlePageChange = (event, page) => {
         setCurrentPage(page);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Handle items per page change using CustomPagination
     const handleItemsPerPageChange = (event) => {
         setItemsPerPage(parseInt(event.target.value));
-        setCurrentPage(1); // Reset to first page
+        setCurrentPage(1);
     };
 
-    // Extract categories array - safe handling
+    // Safe categories array handling
     const categoriesArray = Array.isArray(categoryList) ? categoryList : [];
 
+    // Select dropdown এর জন্য options তৈরি
     const categoryOptions = [
         {label: 'All Categories', value: ''},
         ...categoriesArray.map((item) => ({
             label: item.category_name?.toUpperCase() || 'Unknown',
-            value: item.id,
+            value: item.id.toString(), // ID string হিসেবে পাঠাই
         }))
     ];
-
-    console.log('categoryList:', categoryList);
-    console.log('categoriesArray:', categoriesArray);
-    console.log('categoryOptions:', categoryOptions);
 
     return (
         <div className="product-wrapper">
             <div className="top-bar">
                 <div className="filter-section">
+                    {/* Category Filter Select */}
                     <CustomSelect
                         id="category-filter-select"
                         name="category_id"
                         label="Filter by Category"
-                        placeholder="Please select category"
+                        placeholder={categoriesLoading ? "Loading categories..." : "Please select category"}
                         value={selectedCategory}
                         onChange={handleCategoryChange}
                         options={categoryOptions}
-                        disabled={loading}
+                        disabled={loading || categoriesLoading}
                     />
 
-                    {/* Results count */}
+                    {/* Products count */}
                     {!loading && (
                         <div className="results-count">
                             <span>
                                 Showing {filteredProducts.length} of {totalItems} products
                                 {selectedCategory && (
                                     <span className="category-filter">
-                                        {' '}in {categoriesArray.find(cat => cat.id === parseInt(selectedCategory))?.category_name || 'Selected Category'}
+                                        {' '}in {categoriesArray.find(cat => cat.id.toString() === selectedCategory)?.category_name || 'Selected Category'}
                                     </span>
                                 )}
                             </span>
@@ -229,6 +235,7 @@ const Product = () => {
                 </div>
             </div>
 
+            {/* Products Content */}
             {loading ? (
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
@@ -262,10 +269,11 @@ const Product = () => {
                 </div>
             ) : (
                 <>
+                    {/* Products Grid */}
                     <div className="product-container">
                         {filteredProducts.map((product) => (
                             <ProductCard
-                                key={`product-${product.id}-${cartItems.length}-${Date.now()}`} // Force re-render with timestamp
+                                key={`product-${product.id}-${cartItems.length}-${Date.now()}`}
                                 product={product}
                                 cartItems={cartItems || []}
                                 onAddToCart={handleAddToCart}
@@ -275,7 +283,7 @@ const Product = () => {
                         ))}
                     </div>
 
-                    {/* Custom Pagination Component */}
+                    {/* Pagination */}
                     <CustomPagination
                         currentPage={currentPage}
                         totalPages={totalPages}
@@ -299,6 +307,7 @@ const Product = () => {
                 </>
             )}
 
+            {/* Add Product Modal */}
             <CustomModal
                 isOpen={showModal}
                 onClose={toggleModal}
