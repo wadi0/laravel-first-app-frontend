@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import './cart.scss';
 import {useApp} from "../../components/context/AppContext.jsx";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
+import CustomLoader from "../../components/customLoader/CustomLoader.jsx";
 
 const Cart = () => {
     const {
@@ -123,6 +124,8 @@ const Cart = () => {
 
     return (
         <div className="cart-page">
+            <CustomLoader isLoading={cartLoading} />
+            {!cartLoading && (
             <div className="container">
                 <div className="cart-header">
                     <h1>
@@ -283,6 +286,7 @@ const Cart = () => {
                     </div>
                 )}
             </div>
+                )}
         </div>
     );
 };

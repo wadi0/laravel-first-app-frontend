@@ -7,6 +7,7 @@ import {useApp} from "../../components/context/AppContext.jsx";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import ProductCard from "../product/ProductCard.jsx";
 import {toast} from "react-toastify";
+import CustomLoader from "../../components/customLoader/CustomLoader.jsx";
 
 const Wishlist = () => {
     const {
@@ -94,6 +95,8 @@ const Wishlist = () => {
 
     return (
         <div className="wishlist-page">
+            <CustomLoader isLoading={wishlistLoading} />
+            {!wishlistLoading && (
             <div className="container">
                 <div className="wishlist-header">
                     <h1>
@@ -144,6 +147,7 @@ const Wishlist = () => {
                     </div>
                 )}
             </div>
+            )}
         </div>
     );
 };
