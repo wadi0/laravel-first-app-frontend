@@ -1,11 +1,13 @@
 // pages/cart/Cart.jsx
-import React, { useEffect, useState, useCallback } from 'react';
-import { FaShoppingCart, FaTrash, FaHeart, FaMinus, FaPlus } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import React, {useEffect, useState, useCallback} from 'react';
+import {FaShoppingCart, FaTrash, FaHeart, FaMinus, FaPlus} from 'react-icons/fa';
+import {Link} from 'react-router-dom';
 import './cart.scss';
 import {useApp} from "../../components/context/AppContext.jsx";
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import CustomLoader from "../../components/customLoader/CustomLoader.jsx";
+import AxiosServices from "../../components/network/AxiosServices.jsx";
+import ApiUrlServices from "../../components/network/ApiUrlServices.jsx";
 
 const Cart = () => {
     const {
@@ -19,7 +21,8 @@ const Cart = () => {
     } = useApp();
 
     const [loading, setLoading] = useState({});
-    const [hasLoadedOnce, setHasLoadedOnce] = useState(false); // Prevent multiple initial loads
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+    const [isCheckingOut, setIsCheckingOut] = useState(false); // ✅ Added checkout loading state
 
     // Only load cart once when component mounts
     useEffect(() => {
@@ -27,10 +30,84 @@ const Cart = () => {
             getCartItems();
             setHasLoadedOnce(true);
         }
-    }, []); // Empty dependency array - only run once
+    }, []);
+
+    const handleCheckout = async () => {
+        // ✅ Prevent multiple checkout clicks
+        if (isCheckingOut) return;
+
+        // ✅ Validate cart is not empty
+        if (!cartItems || cartItems.length === 0) {
+            alert("Your cart is empty!");
+            return;
+        }
+
+        // ✅ Validate total amount
+        if (calculations.total <= 0) {
+            alert("Invalid cart total!");
+            return;
+        }
+
+        // ✅ Convert amount to BDT (assuming USD to BDT conversion)
+        const amountInBDT = Math.round((calculations.total * 120) * 100) / 100; // 1 USD = 120 BDT approx
+
+        const payload = {
+            amount: amountInBDT, // ✅ Use 'amount' field as expected by Laravel
+            name: "Zabir Ahmed Wadi",
+            email: "zabir4897@gmail.com",
+            address: "Dhaka, Bangladesh",
+            phone: "01689403095"
+        };
+
+        console.log('Sending payment payload:', payload); // ✅ Debug log
+
+        setIsCheckingOut(true); // ✅ Set loading state
+
+        try {
+            console.log('Sending payment request:', payload); // ✅ Debug log
+
+            const res = await AxiosServices.post(ApiUrlServices.PAYMENT_INIT, payload);
+            console.log('Payment response:', res); // ✅ Debug log
+
+            const data = res.data;
+
+            if (data.status === "success") {
+                if (data.redirect_url && data.redirect_url.trim() !== "") {
+                    // ✅ Successful redirect
+                    console.log('Redirecting to:', data.redirect_url);
+                    window.location.href = data.redirect_url;
+                } else {
+                    // ✅ Success but no redirect URL
+                    console.error('No redirect URL received:', data);
+                    alert("Payment gateway error: No redirect URL received. Please try again.");
+                }
+            } else {
+                // ✅ Server returned error status
+                console.error('Payment failed:', data);
+                alert(data.message || "Payment initialization failed. Please try again.");
+            }
+        } catch (err) {
+            console.error("Checkout error:", err);
+
+            // ✅ Better error handling
+            if (err.response) {
+                // Server error
+                const errorMessage = err.response.data?.message || `Server error: ${err.response.status}`;
+                alert(`Payment failed: ${errorMessage}`);
+            } else if (err.request) {
+                // Network error
+                alert("Network error. Please check your internet connection and try again.");
+            } else {
+                // Other error
+                alert("Something went wrong during checkout. Please try again.");
+            }
+        } finally {
+            setIsCheckingOut(false); // ✅ Reset loading state
+        }
+    };
 
     const handleRemoveFromCart = useCallback(async (product) => {
-        if (!product || loading[`cart-${product.id}`]) return; // Prevent duplicate calls
+        if (!product || loading[`cart-${product.id}`]) return;
 
         setLoading(prev => ({...prev, [`cart-${product.id}`]: true}));
         try {
@@ -46,7 +123,7 @@ const Cart = () => {
     }, [removeFromCart, loading]);
 
     const handleAddToWishlist = useCallback(async (product) => {
-        if (!product || loading[`wishlist-${product.id}`]) return; // Prevent duplicate calls
+        if (!product || loading[`wishlist-${product.id}`]) return;
 
         setLoading(prev => ({...prev, [`wishlist-${product.id}`]: true}));
         try {
@@ -97,14 +174,32 @@ const Cart = () => {
     // Memoize calculations to prevent unnecessary recalculations
     const calculations = React.useMemo(() => {
         const subtotal = (cartItems || []).reduce((total, item) => {
-            return total + ((item.product?.price || 0) * (item.quantity || 1));
+            // ✅ Convert string price to number
+            const price = parseFloat(item.product?.price || 0);
+            const quantity = parseInt(item.quantity || 1);
+
+            console.log('Item calculation:', {
+                name: item.product?.name,
+                price: price,
+                quantity: quantity,
+                itemTotal: price * quantity
+            });
+
+            return total + (price * quantity);
         }, 0);
 
         const shipping = subtotal > 50 ? 0 : 10; // Free shipping over $50
         const tax = subtotal * 0.08; // 8% tax
         const total = subtotal + shipping + tax;
 
-        return { subtotal, shipping, tax, total };
+        console.log('Final calculations:', {
+            subtotal: subtotal,
+            shipping: shipping,
+            tax: tax,
+            total: total
+        });
+
+        return {subtotal, shipping, tax, total};
     }, [cartItems]);
 
     if (cartLoading && !hasLoadedOnce) {
@@ -120,173 +215,171 @@ const Cart = () => {
         );
     }
 
-    const cartItemsArray = cartItems || []; // Safe fallback
+    const cartItemsArray = cartItems || [];
 
     return (
         <div className="cart-page">
-            <CustomLoader isLoading={cartLoading} />
+            <CustomLoader isLoading={cartLoading}/>
             {!cartLoading && (
-            <div className="container">
-                <div className="cart-header">
-                    <h1>
-                        <FaShoppingCart className="page-icon" />
-                        Shopping Cart
-                    </h1>
-                    <p className="cart-count">
-                        {cartItemsArray.length} {cartItemsArray.length === 1 ? 'item' : 'items'} in your cart
-                    </p>
-                </div>
-
-                {cartItemsArray.length === 0 ? (
-                    <div className="empty-cart">
-                        <div className="empty-icon">
-                            <FaShoppingCart />
-                        </div>
-                        <h2>Your cart is empty</h2>
-                        <p>Add some products to get started</p>
-                        <Link to="/product" className="shop-now-btn">
-                            <CustomSubmitButton
-                                type="button"
-                                label="Start Shopping"
-                                btnClassName="default-submit-btn"
-                            />
-                        </Link>
+                <div className="container">
+                    <div className="cart-header">
+                        <h1>
+                            <FaShoppingCart className="page-icon"/>
+                            Shopping Cart
+                        </h1>
+                        <p className="cart-count">
+                            {cartItemsArray.length} {cartItemsArray.length === 1 ? 'item' : 'items'} in your cart
+                        </p>
                     </div>
-                ) : (
-                    <div className="cart-content">
-                        <div className="cart-items">
-                            {cartItemsArray.map((item) => {
-                                if (!item || !item.product) {
-                                    console.warn('Invalid cart item:', item);
-                                    return null;
-                                }
 
-                                return (
-                                    <div key={`cart-item-${item.id}`} className="cart-item">
-                                        <div className="item-image">
-                                            <img
-                                                src={getImageUrl(item.product.image)}
-                                                alt={item.product.name || 'Product'}
-                                                onError={(e) => {
-                                                    e.target.src = '/placeholder-image.png';
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div className="item-details">
-                                            <h3 className="item-name">{item.product.name || 'Unknown Product'}</h3>
-                                            <p className="item-description">{item.product.description || 'No description'}</p>
-                                            <div className="item-price">{formatPrice(item.product.price || 0)}</div>
-                                        </div>
-
-                                        <div className="item-quantity">
-                                            <label>Quantity:</label>
-                                            <div className="quantity-controls">
-                                                <button
-                                                    className="qty-btn"
-                                                    onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) - 1)}
-                                                    disabled={loading[`quantity-${item.product.id}`] || (item.quantity || 1) <= 1}
-                                                    aria-label="Decrease quantity"
-                                                >
-                                                    <FaMinus />
-                                                </button>
-                                                <span className="quantity">{item.quantity || 1}</span>
-                                                <button
-                                                    className="qty-btn"
-                                                    onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) + 1)}
-                                                    disabled={loading[`quantity-${item.product.id}`]}
-                                                    aria-label="Increase quantity"
-                                                >
-                                                    <FaPlus />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="item-total">
-                                            <div className="total-price">
-                                                {formatPrice((item.product.price || 0) * (item.quantity || 1))}
-                                            </div>
-                                        </div>
-
-                                        <div className="item-actions">
-                                            {!isInWishlist(item.product.id) && (
-                                                <button
-                                                    className="action-btn wishlist-btn"
-                                                    onClick={() => handleAddToWishlist(item.product)}
-                                                    disabled={loading[`wishlist-${item.product.id}`]}
-                                                    title="Move to Wishlist"
-                                                    aria-label="Add to wishlist"
-                                                >
-                                                    <FaHeart />
-                                                </button>
-                                            )}
-
-                                            <button
-                                                className="action-btn remove-btn"
-                                                onClick={() => handleRemoveFromCart(item.product)}
-                                                disabled={loading[`cart-${item.product.id}`]}
-                                                title="Remove from Cart"
-                                                aria-label="Remove from cart"
-                                            >
-                                                <FaTrash />
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        <div className="cart-summary">
-                            <div className="summary-card">
-                                <h3>Order Summary</h3>
-
-                                <div className="summary-row">
-                                    <span>Subtotal:</span>
-                                    <span>{formatPrice(calculations.subtotal)}</span>
-                                </div>
-
-                                <div className="summary-row">
-                                    <span>Shipping:</span>
-                                    <span>{calculations.shipping === 0 ? 'Free' : formatPrice(calculations.shipping)}</span>
-                                </div>
-
-                                <div className="summary-row">
-                                    <span>Tax:</span>
-                                    <span>{formatPrice(calculations.tax)}</span>
-                                </div>
-
-                                <div className="summary-divider"></div>
-
-                                <div className="summary-row total">
-                                    <span>Total:</span>
-                                    <span>{formatPrice(calculations.total)}</span>
-                                </div>
-
-                                {calculations.shipping > 0 && (
-                                    <div className="free-shipping-notice">
-                                        Add {formatPrice(50 - calculations.subtotal)} more for free shipping!
-                                    </div>
-                                )}
-
+                    {cartItemsArray.length === 0 ? (
+                        <div className="empty-cart">
+                            <div className="empty-icon">
+                                <FaShoppingCart/>
+                            </div>
+                            <h2>Your cart is empty</h2>
+                            <p>Add some products to get started</p>
+                            <Link to="/product" className="shop-now-btn">
                                 <CustomSubmitButton
                                     type="button"
-                                    label="Proceed to Checkout"
-                                    btnClassName="default-submit-btn checkout-btn"
-                                    onClick={() => {
-                                        // Handle checkout
-                                        console.log('Proceeding to checkout...');
-                                    }}
+                                    label="Start Shopping"
+                                    btnClassName="default-submit-btn"
                                 />
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="cart-content">
+                            <div className="cart-items">
+                                {cartItemsArray.map((item) => {
+                                    if (!item || !item.product) {
+                                        console.warn('Invalid cart item:', item);
+                                        return null;
+                                    }
 
-                                <Link to="/product" className="continue-shopping">
-                                    Continue Shopping
-                                </Link>
+                                    return (
+                                        <div key={`cart-item-${item.id}`} className="cart-item">
+                                            <div className="item-image">
+                                                <img
+                                                    src={getImageUrl(item.product.image)}
+                                                    alt={item.product.name || 'Product'}
+                                                    onError={(e) => {
+                                                        e.target.src = '/placeholder-image.png';
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div className="item-details">
+                                                <h3 className="item-name">{item.product.name || 'Unknown Product'}</h3>
+                                                <p className="item-description">{item.product.description || 'No description'}</p>
+                                                <div className="item-price">{formatPrice(item.product.price || 0)}</div>
+                                            </div>
+
+                                            <div className="item-quantity">
+                                                <label>Quantity:</label>
+                                                <div className="quantity-controls">
+                                                    <button
+                                                        className="qty-btn"
+                                                        onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) - 1)}
+                                                        disabled={loading[`quantity-${item.product.id}`] || (item.quantity || 1) <= 1}
+                                                        aria-label="Decrease quantity"
+                                                    >
+                                                        <FaMinus/>
+                                                    </button>
+                                                    <span className="quantity">{item.quantity || 1}</span>
+                                                    <button
+                                                        className="qty-btn"
+                                                        onClick={() => handleQuantityUpdate(item.product, (item.quantity || 1) + 1)}
+                                                        disabled={loading[`quantity-${item.product.id}`]}
+                                                        aria-label="Increase quantity"
+                                                    >
+                                                        <FaPlus/>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="item-total">
+                                                <div className="total-price">
+                                                    {formatPrice((item.product.price || 0) * (item.quantity || 1))}
+                                                </div>
+                                            </div>
+
+                                            <div className="item-actions">
+                                                {!isInWishlist(item.product.id) && (
+                                                    <button
+                                                        className="action-btn wishlist-btn"
+                                                        onClick={() => handleAddToWishlist(item.product)}
+                                                        disabled={loading[`wishlist-${item.product.id}`]}
+                                                        title="Move to Wishlist"
+                                                        aria-label="Add to wishlist"
+                                                    >
+                                                        <FaHeart/>
+                                                    </button>
+                                                )}
+
+                                                <button
+                                                    className="action-btn remove-btn"
+                                                    onClick={() => handleRemoveFromCart(item.product)}
+                                                    disabled={loading[`cart-${item.product.id}`]}
+                                                    title="Remove from Cart"
+                                                    aria-label="Remove from cart"
+                                                >
+                                                    <FaTrash/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="cart-summary">
+                                <div className="summary-card">
+                                    <h3>Order Summary</h3>
+
+                                    <div className="summary-row">
+                                        <span>Subtotal:</span>
+                                        <span>{formatPrice(calculations.subtotal)}</span>
+                                    </div>
+
+                                    <div className="summary-row">
+                                        <span>Shipping:</span>
+                                        <span>{calculations.shipping === 0 ? 'Free' : formatPrice(calculations.shipping)}</span>
+                                    </div>
+
+                                    <div className="summary-row">
+                                        <span>Tax:</span>
+                                        <span>{formatPrice(calculations.tax)}</span>
+                                    </div>
+
+                                    <div className="summary-divider"></div>
+
+                                    <div className="summary-row total">
+                                        <span>Total:</span>
+                                        <span>{formatPrice(calculations.total)}</span>
+                                    </div>
+
+                                    {calculations.shipping > 0 && (
+                                        <div className="free-shipping-notice">
+                                            Add {formatPrice(50 - calculations.subtotal)} more for free shipping!
+                                        </div>
+                                    )}
+
+                                    <CustomSubmitButton
+                                        type="button"
+                                        label={isCheckingOut ? "Processing..." : "Proceed to Checkout"}
+                                        btnClassName="default-submit-btn checkout-btn"
+                                        onClick={handleCheckout}
+                                        disabled={isCheckingOut} // ✅ Disable during checkout
+                                    />
+
+                                    <Link to="/product" className="continue-shopping">
+                                        Continue Shopping
+                                    </Link>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
-            </div>
-                )}
+                    )}
+                </div>
+            )}
         </div>
     );
 };
