@@ -30,11 +30,23 @@ const ApiUrlServices = {
     // collection api
     All_COLLECTION: "collections",
     TITLE_COLLECTION: (slug) => `collections/${slug}`,
+    // COLLECTIONS: `${BASE_URL}/collections`,
+    // COLLECTION_BY_SLUG: (slug) => `${BASE_URL}/collections/${slug}`,
+    // COLLECTION_CREATE: `${BASE_URL}/collections`,
+    // COLLECTION_UPDATE: (id) => `${BASE_URL}/collections/${id}`,
+    // COLLECTION_DELETE: (id) => `${BASE_URL}/collections/${id}`,
+
+    // Order endpoints
+    ORDERS: `orders`,
+    ORDER_PLACE: `orders`,
+    ORDER_BY_ID: (id) => `/orders/${id}`,
+    ORDER_UPDATE_STATUS: (id) => `/orders/${id}/status`,
 
     // ssl ecommerze payment api
     PAYMENT_INIT: "payment/init",
     PAYMENT_SUCCESS: "api/payment/success",
     PAYMENT_FAIL: "payment/fail",
     PAYMENT_CANCEL: "api/payment/cancel",
+    PAYMENT_IPN: `payment/ipn`,
 }
 export default ApiUrlServices

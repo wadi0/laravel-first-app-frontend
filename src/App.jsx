@@ -13,6 +13,11 @@ import PrivateRoute from "./routes/PrivateRoute.jsx";
 import PublicRoute from "./routes/PublicRoute.jsx";
 import ErrorBoundary from "./components/errorBoundary/ErrorBoundary.jsx";
 import {AppProvider} from "./components/context/AppContext.jsx";
+import Checkout from "./pages/checkout/Checkout.jsx";
+import OrderSuccess from "./pages/order/OrderSuccess.jsx";
+import Orders from "./pages/order/Order.jsx";
+import OrderDetails from "./pages/order/OrderDetails.jsx";
+import TrackOrder from "./pages/order/TrackOrder.jsx";
 
 function App() {
     return (
@@ -40,6 +45,11 @@ function App() {
                                     <Wishlist/>
                                 </ErrorBoundary>
                             }/>
+                            <Route path={path.checkout} element={<Checkout/>}/>
+                            <Route path={path.order_success_route} element={<OrderSuccess/>}/>
+                            <Route path={path.orders} element={<Orders/>}/>
+                                                        <Route path={path.order_details_route} element={<OrderDetails/>}/>
+                                                        <Route path={path.track_order_route} element={<TrackOrder/>}/>
                         </Route>
                     </Route>
                 </Routes>

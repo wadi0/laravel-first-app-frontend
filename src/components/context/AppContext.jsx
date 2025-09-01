@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { toast } from "react-toastify";
 import AxiosServices from "../network/AxiosServices.jsx";
 import ApiUrlServices from "../network/ApiUrlServices.jsx";
+import path from "../../routes/path.jsx";
 
 const AppContext = createContext();
 
@@ -48,7 +49,7 @@ export const AppProvider = ({ children }) => {
     const redirectToLogin = () => {
         toast.error('Please login first to continue');
         setTimeout(() => {
-            window.location.href = '/login';
+            window.location.href = path.login;
         }, 1500);
     };
 
