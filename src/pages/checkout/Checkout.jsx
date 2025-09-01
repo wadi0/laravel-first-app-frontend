@@ -1,7 +1,7 @@
 // pages/checkout/Checkout.jsx
-import React, { useState, useCallback, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { FaShoppingBag, FaArrowLeft, FaCreditCard, FaMoneyBillWave } from 'react-icons/fa';
+import React, {useState, useCallback, useMemo} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {FaShoppingBag, FaArrowLeft, FaCreditCard, FaMoneyBillWave} from 'react-icons/fa';
 import './checkout.scss';
 import CustomSubmitButton from "../../components/custombutton/CustomButton.jsx";
 import CustomLoader from "../../components/customLoader/CustomLoader.jsx";
@@ -14,7 +14,7 @@ const Checkout = () => {
     const navigate = useNavigate();
 
     // Get selected items from location state
-    const { selectedItems = [], selectedItemIds = [] } = location.state || {};
+    const {selectedItems = [], selectedItemIds = []} = location.state || {};
 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -57,12 +57,12 @@ const Checkout = () => {
         const tax = subtotal * 0.08; // 8% tax
         const total = subtotal + shipping + tax;
 
-        return { subtotal, shipping, tax, total };
+        return {subtotal, shipping, tax, total};
     }, [selectedItems]);
 
     // Handle form input changes
     const handleInputChange = useCallback((e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -129,14 +129,14 @@ const Checkout = () => {
 
                 // If payment method is SSLCommerz, redirect to payment
                 if (formData.payment_method === 'sslcommerz') {
-                    // Convert USD to BDT for payment gateway
                     const amountInBDT = Math.round((calculations.total * 120) * 100) / 100;
 
                     const paymentData = {
                         amount: amountInBDT,
                         order_id: order.id,
-                        name: "Customer", // You can get this from user profile
-                        email: "customer@example.com", // You can get this from user profile
+                        transaction_id: order.transaction_id, // ✅ ADD THIS
+                        name: "Customer",
+                        email: "customer@example.com",
                         address: formData.shipping_address,
                         phone: formData.phone
                     };
@@ -151,7 +151,7 @@ const Checkout = () => {
 
                 // ✅ FIXED: Correct navigation syntax
                 navigate(path.order_success(order.id), {
-                    state: { order: order }
+                    state: {order: order}
                 });
             }
         } catch (error) {
@@ -186,7 +186,7 @@ const Checkout = () => {
 
     return (
         <div className="checkout-page">
-            <CustomLoader isLoading={loading} />
+            <CustomLoader isLoading={loading}/>
 
             <div className="container">
                 <div className="checkout-header">
@@ -195,10 +195,10 @@ const Checkout = () => {
                         onClick={() => navigate(path.cart)}
                         aria-label="Back to cart"
                     >
-                        <FaArrowLeft />
+                        <FaArrowLeft/>
                     </button>
                     <h1>
-                        <FaShoppingBag className="page-icon" />
+                        <FaShoppingBag className="page-icon"/>
                         Checkout
                     </h1>
                 </div>
@@ -304,7 +304,7 @@ const Checkout = () => {
                                     onChange={handleInputChange}
                                 />
                                 <div className="payment-info">
-                                    <FaCreditCard className="payment-icon" />
+                                    <FaCreditCard className="payment-icon"/>
                                     <div>
                                         <strong>Online Payment</strong>
                                         <p>Pay securely with credit/debit card or mobile banking</p>
@@ -321,7 +321,7 @@ const Checkout = () => {
                                     onChange={handleInputChange}
                                 />
                                 <div className="payment-info">
-                                    <FaMoneyBillWave className="payment-icon" />
+                                    <FaMoneyBillWave className="payment-icon"/>
                                     <div>
                                         <strong>Cash on Delivery</strong>
                                         <p>Pay when you receive your order</p>

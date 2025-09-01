@@ -72,7 +72,7 @@ const Product = () => {
                 currentPage++;
             }
             setCategoryList(allCategories);
-            toast.success('Categories loaded successfully!');
+            // toast.success('Categories loaded successfully!');
 
         } catch (error) {
             toast.error('Failed to load categories');
@@ -105,7 +105,7 @@ const Product = () => {
             setFilteredProducts(res.data.data); // For display
             setTotalPages(res.data.last_page); // Total pages
             setTotalItems(res.data.total); // Total items
-            toast.success('Product loaded successfully!');
+            // toast.success('Product loaded successfully!');
 
         } catch (err) {
             if (err.response?.status !== 401) {
@@ -137,7 +137,7 @@ const Product = () => {
         try {
             const success = await addToCart(product);
             if (success) {
-                toast.success("Product added to cart!");
+                // toast.success("Product added to cart!");
                 setTimeout(() => {
                     setProductList(prev => [...prev]);
                 }, 100);
@@ -153,7 +153,7 @@ const Product = () => {
         try {
             const success = await removeFromCart(product);
             if (success) {
-                toast.success("Remove from cart successfully!");
+                // toast.success("Remove from cart successfully!");
                 setTimeout(() => {
                     setProductList(prev => [...prev]);
                 }, 100);
