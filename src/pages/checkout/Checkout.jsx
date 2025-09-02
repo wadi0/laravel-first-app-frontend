@@ -99,73 +99,82 @@ const Checkout = () => {
         return Object.keys(newErrors).length === 0;
     }, [formData]);
 
-    // Handle order placement
-    const handlePlaceOrder = useCallback(async () => {
-        if (loading) return;
+    // Enhanced handlePlaceOrder function with better error handling
+const handlePlaceOrder = useCallback(async () => {
+    if (loading) return;
 
-        if (!validateForm()) {
-            return;
-        }
+    if (!validateForm()) {
+        return;
+    }
 
-        setLoading(true);
+    setLoading(true);
 
-        try {
-            const orderData = {
-                cart_ids: selectedItemIds,
-                shipping_address: formData.shipping_address,
-                phone: formData.phone,
-                payment_method: formData.payment_method,
-                notes: formData.notes
-            };
+    try {
+        const orderData = {
+            cart_ids: selectedItemIds,
+            shipping_address: formData.shipping_address,
+            phone: formData.phone,
+            payment_method: formData.payment_method,
+            notes: formData.notes
+        };
 
-            console.log('Placing order with data:', orderData);
+        console.log('Placing order with data:', orderData);
 
-            const response = await AxiosServices.post(ApiUrlServices.ORDER_PLACE, orderData);
+        const response = await AxiosServices.post(ApiUrlServices.ORDER_PLACE, orderData);
 
-            console.log('Order response:', response);
+        if (response.data && response.data.order) {
+            const order = response.data.order;
 
-            if (response.data && response.data.order) {
-                const order = response.data.order;
+            // If payment method is SSLCommerz, redirect to payment
+            if (formData.payment_method === 'sslcommerz') {
+                const amountInBDT = Math.round((calculations.total * 120) * 100) / 100;
 
-                // If payment method is SSLCommerz, redirect to payment
-                if (formData.payment_method === 'sslcommerz') {
-                    const amountInBDT = Math.round((calculations.total * 120) * 100) / 100;
+                const paymentData = {
+                    amount: amountInBDT,
+                    order_id: order.id,
+                    name: "Customer Name",
+                    email: "customer@example.com", 
+                    phone: formData.phone,
+                    address: formData.shipping_address
+                };
 
-                    const paymentData = {
-                        amount: amountInBDT,
-                        order_id: order.id,
-                        transaction_id: order.transaction_id, // ✅ ADD THIS
-                        name: "Customer",
-                        email: "customer@example.com",
-                        address: formData.shipping_address,
-                        phone: formData.phone
-                    };
+                console.log('Payment data:', paymentData);
 
-                    const paymentResponse = await AxiosServices.post(ApiUrlServices.PAYMENT_INIT, paymentData);
+                const paymentResponse = await AxiosServices.post(ApiUrlServices.PAYMENT_INIT, paymentData);
+                
+                console.log('Payment response:', paymentResponse.data);
 
-                    if (paymentResponse.data.status === "success" && paymentResponse.data.redirect_url) {
-                        window.location.href = paymentResponse.data.redirect_url;
-                        return;
-                    }
+                if (paymentResponse.data.status === "success" && paymentResponse.data.redirect_url) {
+                    console.log('Redirecting to:', paymentResponse.data.redirect_url);
+                    window.location.href = paymentResponse.data.redirect_url;
+                    return;
+                } else {
+                    console.error('Payment failed:', paymentResponse.data);
+                    alert('Payment initialization failed');
+                    return;
                 }
-
-                // ✅ FIXED: Correct navigation syntax
-                navigate(path.order_success(order.id), {
-                    state: {order: order}
-                });
             }
-        } catch (error) {
-            console.error('Order placement error:', error);
 
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
-            } else {
-                alert(error.response?.data?.message || 'Failed to place order. Please try again.');
-            }
-        } finally {
-            setLoading(false);
+            // For COD orders
+            navigate(path.order_success(order.id), {
+                state: {order: order}
+            });
         }
-    }, [loading, validateForm, selectedItemIds, formData, calculations.total, navigate]);
+    } catch (error) {
+        console.error('Order placement error:', error);
+        
+        if (error.response?.data?.errors) {
+            setErrors(error.response.data.errors);
+        } else {
+            const errorMessage = error.response?.data?.message || 
+                               error.message || 
+                               'Failed to place order. Please try again.';
+            alert(errorMessage);
+        }
+    } finally {
+        setLoading(false);
+    }
+}, [loading, validateForm, selectedItemIds, formData, calculations.total, navigate]);
 
     const formatPrice = useCallback((price) => {
         return new Intl.NumberFormat('en-US', {
