@@ -1,22 +1,9 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {
-    FaUserCircle,
-    FaHeart,
-    FaShoppingCart,
-    FaSearch,
-    FaTimes,
-    FaChevronDown,
-    FaBars,
-    FaHome,
-    FaBox,
-    FaUser,
-    FaCog,
-    FaSignOutAlt,
-    FaClipboardList,
-    FaQuestionCircle,
-    FaSignInAlt,
+    FaUserCircle, FaHeart, FaShoppingCart, FaSearch, FaTimes, FaChevronDown,
+    FaBars, FaHome, FaBox, FaUser, FaCog, FaSignOutAlt, FaClipboardList, FaQuestionCircle,
 } from 'react-icons/fa';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, useNavigate, useLocation} from 'react-router-dom';
 import './navbar.scss';
 import logo from '../../assets/my_logo.png';
 import path from '../../routes/path.jsx';
@@ -30,477 +17,532 @@ const Navbar = () => {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [searchActive, setSearchActive] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [activeBottomTab, setActiveBottomTab] = useState('home');
-    const [showUserDropdown, setShowUserDropdown] = useState(false);
+    const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+    const [mobileUserDropdownOpen, setMobileUserDropdownOpen] = useState(false); // Separate state for mobile
+    const [user, setUser] = useState(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
     const userDropdownRef = useRef(null);
+    const mobileMenuRef = useRef(null);
+    const mobileUserDropdownRef = useRef(null);
 
-    // App context থেকে cart, wishlist count এবং login status নিন
     const {cartCount, wishlistCount, isLoggedIn} = useApp();
-
-    // User data - localStorage থেকে নিন
-    const [user, setUser] = useState({
-        name: 'Guest',
-        email: 'guest@example.com',
-        avatar: null,
-    });
-
     const navigate = useNavigate();
+    const location = useLocation();
 
-    // Load user data from localStorage on component mount
-    useEffect(() => {
-        const loadUserData = () => {
-            try {
-                const userData = JSON.parse(localStorage.getItem('user'));
-                if (userData && userData.token) {
-                    setUser({
-                        name: userData.name || userData.username || 'User',
-                        email: userData.email || 'user@example.com',
-                        avatar: userData.avatar || null,
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading user data:', error);
-            }
-        };
-
-        loadUserData();
-    }, []);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
-                setShowUserDropdown(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
-    // Updated menu items with proper dropdown routing
+    // Menu configuration
     const menuItems = [
         {name: 'Home', path: path.home},
         {
-            name: 'Product',
-            path: path.product,
+            name: 'Product', path: path.product,
             dropdown: [
                 {label: 'All Products', path: path.product},
-                {label: 'Featured', path: path.home},
-                {label: 'Best Sellers', path: '#'},
+                {label: 'Featured', path: '/products/featured'},
+                {label: 'Best Sellers', path: '/products/bestsellers'},
             ],
         },
-        {name: 'About Us', path: '#'},
+        {name: 'About Us', path: '/about'},
         {
-            name: 'Blog',
-            path: '#',
+            name: 'Blog', path: '/blog',
             dropdown: [
-                {label: 'Latest Posts', path: '#'},
-                {label: 'Tutorials', path: '#'},
+                {label: 'Latest Posts', path: '/blog/latest'},
+                {label: 'Tutorials', path: '/blog/tutorials'},
             ],
         },
-        // {
-        //     name: 'Categories',
-        //     path: '/categories',
-        //     dropdown: [
-        //         {label: 'Men', path: '#'},
-        //         {label: 'Women', path: '#'},
-        //         {label: 'Kids', path: '#'},
-        //     ],
-        // },
         {
-            name: 'Pages',
-            path: '#',
+            name: 'Pages', path: '/pages',
             dropdown: [
-                {label: 'FAQ', path: '#'},
-                {label: 'Terms', path: '#'},
-                {label: 'Privacy', path: '#'},
+                {label: 'FAQ', path: '/faq'},
+                {label: 'Terms', path: '/terms'},
+                {label: 'Privacy', path: '/privacy'},
             ],
         },
-        {name: 'Contact', path: '#'},
+        {name: 'Contact', path: '/contact'},
     ];
 
     const bottomNavItems = [
-        {id: 'home', icon: FaHome, label: 'Home'},
-        {id: 'product', icon: FaBox, label: 'Product'},
+        {id: 'home', icon: FaHome, label: 'Home', path: path.home},
+        {id: 'product', icon: FaBox, label: 'Product', path: path.product},
         {id: 'search', icon: searchActive ? FaTimes : FaSearch, label: 'Search'},
-        {id: 'cart', icon: FaShoppingCart, label: 'Cart', count: cartCount},
-        {id: 'wishlist', icon: FaHeart, label: 'Wishlist', count: wishlistCount},
+        {id: 'cart', icon: FaShoppingCart, label: 'Cart', count: cartCount, path: path.cart},
+        {id: 'wishlist', icon: FaHeart, label: 'Wishlist', count: wishlistCount, path: path.wishlist},
     ];
 
-    // User dropdown menu items - only show if logged in
     const userMenuItems = [
         {icon: FaUser, label: 'My Profile', path: '#'},
-        {icon: FaClipboardList, label: 'My Orders', path: '#'},
+        {icon: FaClipboardList, label: 'My Orders', path: path.orders},
         {icon: FaHeart, label: 'Wishlist', path: path.wishlist},
         {icon: FaCog, label: 'Settings', path: '#'},
         {icon: FaQuestionCircle, label: 'Help & Support', path: '#'},
         {icon: FaSignOutAlt, label: 'Logout', action: 'logout'},
     ];
 
-    const handleSearch = () => {
-        navigate(`/search?query=${encodeURIComponent(searchText)}`);
+    // Check if current path matches menu item
+    const isActiveMenu = (menuPath, dropdownItems = null) => {
+        if (menuPath === location.pathname) return true;
+
+        // Check dropdown items
+        if (dropdownItems) {
+            return dropdownItems.some(item => item.path === location.pathname);
+        }
+
+        return false;
     };
 
-    const handleBottomNavClick = (tabId) => {
-        if (tabId === 'search') {
-            if (searchActive) {
-                handleSearchClose();
-            } else {
-                setSearchActive(true);
-                setActiveBottomTab(tabId);
+    // Check if current path matches submenu item
+    const isActiveSubmenu = (submenuPath) => {
+        return submenuPath === location.pathname;
+    };
+
+    // Update bottom tab based on current route
+    const updateBottomTabFromRoute = () => {
+        const currentPath = location.pathname;
+
+        // Find matching bottom nav item
+        const matchingTab = bottomNavItems.find(item => {
+            if (item.path) {
+                return currentPath === item.path;
             }
+            return false;
+        });
+
+        if (matchingTab) {
+            setActiveBottomTab(matchingTab.id);
         } else {
+            // Check if current path matches any menu item to set appropriate bottom tab
+            const matchingMenu = menuItems.find(menu =>
+                menu.path === currentPath ||
+                (menu.dropdown && menu.dropdown.some(sub => sub.path === currentPath))
+            );
+
+            if (matchingMenu) {
+                if (matchingMenu.name === 'Home') {
+                    setActiveBottomTab('home');
+                } else if (matchingMenu.name === 'Product' ||
+                          (matchingMenu.dropdown && matchingMenu.dropdown.some(sub => sub.path === currentPath))) {
+                    setActiveBottomTab('product');
+                } else {
+                    setActiveBottomTab('home'); // Default fallback
+                }
+            }
+        }
+    };
+
+    // Load user data
+    useEffect(() => {
+        try {
+            const userData = JSON.parse(localStorage.getItem('user'));
+            if (userData?.token) {
+                setUser({
+                    name: userData.name || userData.username || 'User',
+                    email: userData.email,
+                    avatar: userData.avatar || null,
+                });
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    }, []);
+
+    // Update bottom tab when route changes
+    useEffect(() => {
+        updateBottomTabFromRoute();
+    }, [location.pathname]);
+
+    // FIXED: Separate click outside handling for desktop and mobile user dropdowns
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Handle desktop user dropdown
+            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+                setUserDropdownOpen(false);
+            }
+
+            // Handle mobile user dropdown separately
+            if (mobileUserDropdownRef.current && !mobileUserDropdownRef.current.contains(event.target)) {
+                setMobileUserDropdownOpen(false);
+            }
+
+            // Handle mobile menu
+            if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+                setMobileMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Close mobile menu on window resize
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setMobileMenuOpen(false);
+                setMobileUserDropdownOpen(false); // Close mobile user dropdown on resize
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const handleSearch = () => {
+        if (searchText.trim()) {
+            navigate(`/search?query=${encodeURIComponent(searchText)}`);
             setSearchActive(false);
             setSearchText('');
-            setActiveBottomTab(tabId);
-
-            // Navigate to appropriate routes
-            if (tabId === 'home') {
-                navigate('/');
-            } else if (tabId === 'product') {
-                navigate('/product');
-            } else if (tabId === 'cart') {
-                navigate('/cart');
-            } else if (tabId === 'wishlist') {
-                navigate('/wishlist');
-            } else {
-                navigate(`/${tabId}`);
-            }
+            setActiveBottomTab('home'); // Reset to home after search
         }
     };
 
-    const handleSearchClose = () => {
+    const handleBottomNav = (tabId) => {
+        if (tabId === 'search') {
+            if (searchActive) {
+                setSearchActive(false);
+                setSearchText('');
+                // Don't change activeBottomTab here, keep current tab
+            } else {
+                setSearchActive(true);
+                // Don't change activeBottomTab when opening search
+            }
+            return;
+        }
+
         setSearchActive(false);
         setSearchText('');
-        setActiveBottomTab('home');
+        setActiveBottomTab(tabId);
+
+        const routes = {
+            home: path.home,
+            product: path.product,
+            cart: path.cart,
+            wishlist: path.wishlist
+        };
+        navigate(routes[tabId] || `/${tabId}`);
     };
 
-    // New function to handle dropdown item clicks
-    const handleDropdownClick = (dropdownItem, e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Close the dropdown
-        setActiveDropdown(null);
-
-        // Navigate based on the path
-        if (dropdownItem.path && dropdownItem.path !== '#') {
-            navigate(dropdownItem.path);
+    const handleNavigation = (navigatePath) => {
+        if (navigatePath && navigatePath !== '#') {
+            navigate(navigatePath);
+            setMobileMenuOpen(false);
+            setActiveDropdown(null);
+            setSearchActive(false); // Close search when navigating
         }
-        // If path is '#', do nothing (stays on current page)
     };
 
     const handleLogout = async () => {
         try {
-            // Call logout API
             await AxiosServices.post(ApiUrlServices.LOG_OUT);
-
-            // Clear local storage
             localStorage.removeItem('user');
-
-            // Reset user state
-            setUser({
-                name: 'Guest',
-                email: 'guest@example.com',
-                avatar: null,
-            });
-
-            // Close dropdown if open
-            setShowUserDropdown(false);
-
-            // Redirect to login page
+            setUserDropdownOpen(false);
+            setMobileUserDropdownOpen(false); // Close both dropdowns
+            setUser(null);
             navigate(path.login);
             toast.success("Logout successful!");
-
         } catch (error) {
-            console.error('Logout error:', error);
-
-            // Even if API call fails, still logout locally for better UX
             localStorage.removeItem('user');
-            setUser({
-                name: 'Guest',
-                email: 'guest@example.com',
-                avatar: null,
-            });
-            setShowUserDropdown(false);
+            setUserDropdownOpen(false);
+            setMobileUserDropdownOpen(false); // Close both dropdowns
+            setUser(null);
             navigate(path.login);
-
-            // Show appropriate error message
-            if (error.response?.status === 401) {
-                toast.info("Session expired. Please login again.");
-            } else {
-                toast.warning("Logout completed locally. Please check your connection.");
-            }
+            toast.info(error.response?.status === 401 ? "Session expired." : "Logout completed locally.");
         }
     };
 
-    const handleLogin = () => {
-        navigate(path.login);
-    };
-
-    const handleUserMenuClick = (item) => {
+    const handleUserMenu = (item) => {
         if (item.action === 'logout') {
             handleLogout();
-        } else if (item.path) {
+        } else if (item.path && item.path !== '#') {
             navigate(item.path);
         }
-        setShowUserDropdown(false);
+        setUserDropdownOpen(false);
+        setMobileUserDropdownOpen(false); // Close both dropdowns
     };
 
-    // Icon with badge component
+    // FIXED: Separate handlers for desktop and mobile user buttons
+    const handleDesktopUserButtonClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setUserDropdownOpen(prev => !prev);
+        setMobileUserDropdownOpen(false); // Close mobile when opening desktop
+    };
+
+    const handleMobileUserButtonClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setMobileUserDropdownOpen(prev => !prev);
+        setUserDropdownOpen(false); // Close desktop when opening mobile
+    };
+
     const IconWithBadge = ({icon: Icon, count, className, ...props}) => (
-        <div className="icon-with-badge" {...props}>
+        <div className="icon-badge-wrapper" {...props}>
             <Icon className={className}/>
-            {count > 0 && <span className="badge-counter">{count > 99 ? '99+' : count}</span>}
+            {count > 0 && <span className="badge">{count > 99 ? '99+' : count}</span>}
         </div>
     );
 
     return (
         <>
-            <header className="navbar-main">
-                <div
-                    className={`navbar-container ${
-                        searchActive ? 'search-active' : ''
-                    } ${mobileSidebarOpen ? 'blurred' : ''}`}
-                >
+            {/* Modern Navbar */}
+            <nav className="modern-navbar">
+                <div className={`navbar-container ${searchActive ? 'search-mode' : ''}`}>
+                    {/* Left Section - Logo */}
                     <div className="navbar-left">
-                        <div className="mobile-toggle" onClick={() => setMobileSidebarOpen(true)}>
-                            <FaBars/>
-                        </div>
-                        <div className="logo">
+                        <Link to="/" className="navbar-brand">
                             <img src={logo} alt="Logo"/>
-                        </div>
+                        </Link>
                     </div>
 
+                    {/* Center Menu - Desktop */}
                     {!searchActive && (
-                        <nav className="navbar-center">
-                            <ul className="menu">
+                        <div className="navbar-center">
+                            <ul className="navbar-menu">
                                 {menuItems.map((item, index) => (
-                                    <li
-                                        key={index}
-                                        className={`menu-item ${activeDropdown === index ? 'active' : ''}`}
+                                    <li key={index} className={`navbar-item ${isActiveMenu(item.path, item.dropdown) ? 'active' : ''}`}
                                         onMouseEnter={() => setActiveDropdown(index)}
-                                        onMouseLeave={() => setActiveDropdown(null)}
-                                    >
-                                        <Link to={item.path || '#'}>
-                                            {item.name} {item.dropdown && <FaChevronDown className="arrow"/>}
+                                        onMouseLeave={() => setActiveDropdown(null)}>
+                                        <Link to={item.path || '#'} className={`navbar-link ${isActiveMenu(item.path, item.dropdown) ? 'active' : ''}`}>
+                                            {item.name}
+                                            {item.dropdown && <FaChevronDown className="dropdown-arrow"/>}
                                         </Link>
                                         {item.dropdown && activeDropdown === index && (
-                                            <ul className="dropdown">
+                                            <div className="navbar-dropdown">
                                                 {item.dropdown.map((subItem, subIndex) => (
-                                                    <li key={subIndex}>
-                                                        <a
-                                                            href="#"
-                                                            onClick={(e) => handleDropdownClick(subItem, e)}
-                                                            className="dropdown-link"
-                                                        >
-                                                            {subItem.label}
-                                                        </a>
-                                                    </li>
+                                                    <Link key={subIndex} to={subItem.path}
+                                                          className={`dropdown-item ${isActiveSubmenu(subItem.path) ? 'active' : ''}`}
+                                                          onClick={(e) => {
+                                                              e.preventDefault();
+                                                              handleNavigation(subItem.path);
+                                                          }}>
+                                                        {subItem.label}
+                                                    </Link>
                                                 ))}
-                                            </ul>
+                                            </div>
                                         )}
                                     </li>
                                 ))}
                             </ul>
-                        </nav>
+                        </div>
                     )}
 
-                    <div className="navbar-right">
-                        {!searchActive ? (
-                            <>
-                                <FaSearch className="icon desktop-only" onClick={() => setSearchActive(true)}/>
-                                <Link to={path.wishlist} className="desktop-only">
-                                    <IconWithBadge
-                                        icon={FaHeart}
-                                        count={wishlistCount}
-                                        className="icon"
-                                    />
-                                </Link>
-                                <Link to={path.cart} className="desktop-only">
-                                    <IconWithBadge
-                                        icon={FaShoppingCart}
-                                        count={cartCount}
-                                        className="icon"
-                                    />
-                                </Link>
+                    {/* Mobile Right Section - Hamburger and User Menu */}
+                    {!searchActive && (
+                        <div className="mobile-right-section">
+                            <div className="mobile-menu-wrapper" ref={mobileMenuRef}>
+                                <button
+                                    className={`mobile-menu-btn ${mobileMenuOpen ? 'active' : ''}`}
+                                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                >
+                                    <FaBars/>
+                                </button>
 
-                                {/* Conditional rendering based on login status */}
-                                {isLoggedIn() ? (
-                                    <div
-                                        className="user-profile-wrapper"
-                                        ref={userDropdownRef}
-                                        onClick={() => setShowUserDropdown(!showUserDropdown)}
-                                    >
-                                        <FaUserCircle className="icon user-icon"/>
-
-                                        {showUserDropdown && (
-                                            <div className="user-dropdown">
-                                                <div className="user-info">
-                                                    <div className="user-avatar">
-                                                        {user.avatar ? (
-                                                            <img src={user.avatar} alt="User Avatar"/>
-                                                        ) : (
-                                                            <FaUserCircle/>
+                                {/* Mobile Menu Dropdown */}
+                                {mobileMenuOpen && (
+                                    <div className="mobile-menu-dropdown">
+                                        <div className="mobile-menu-content">
+                                            {menuItems.map((item, index) => (
+                                                <div key={index} className="mobile-menu-item">
+                                                    <button
+                                                        className={`mobile-menu-link ${activeDropdown === index ? 'dropdown-active' : ''} ${isActiveMenu(item.path, item.dropdown) ? 'active' : ''}`}
+                                                        onClick={() => {
+                                                            if (item.dropdown) {
+                                                                setActiveDropdown(activeDropdown === index ? null : index);
+                                                            } else {
+                                                                handleNavigation(item.path);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <span>{item.name}</span>
+                                                        {item.dropdown && (
+                                                            <FaChevronDown
+                                                                className={`dropdown-arrow ${activeDropdown === index ? 'rotated' : ''}`}
+                                                            />
                                                         )}
-                                                    </div>
-                                                    <div className="user-details">
-                                                        <h4>{user.name}</h4>
-                                                        <p>{user.email}</p>
-                                                    </div>
+                                                    </button>
+
+                                                    {item.dropdown && activeDropdown === index && (
+                                                        <div className="mobile-submenu">
+                                                            {item.dropdown.map((subItem, subIndex) => (
+                                                                <button
+                                                                    key={subIndex}
+                                                                    className={`mobile-submenu-link ${isActiveSubmenu(subItem.path) ? 'active' : ''}`}
+                                                                    onClick={() => handleNavigation(subItem.path)}
+                                                                >
+                                                                    {subItem.label}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
+                                            ))}
 
-                                                <div className="dropdown-divider"></div>
-
-                                                <ul className="user-menu-list">
-                                                    {userMenuItems.map((item, index) => (
-                                                        <li
-                                                            key={index}
-                                                            className="user-menu-item"
-                                                            onClick={() => handleUserMenuClick(item)}
-                                                        >
-                                                            <item.icon className="menu-icon"/>
-                                                            <span>{item.label}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div onClick={handleLogin}>
-                                        <IoIosLogIn className="icon user-icon"/>
+                                            {/* Login section for mobile menu */}
+                                            {!isLoggedIn() && (
+                                                <div className="mobile-menu-login">
+                                                    <button
+                                                        className="mobile-login-btn"
+                                                        onClick={() => {
+                                                            navigate(path.login);
+                                                            setMobileMenuOpen(false);
+                                                        }}
+                                                    >
+                                                        <IoIosLogIn/>
+                                                        <span>Login</span>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* FIXED: Mobile User Menu with separate ref and state */}
+                            <div className="mobile-user-menu" ref={mobileUserDropdownRef}>
+                                <div className="user-menu">
+                                    <button
+                                        className={`action-btn user-btn ${mobileUserDropdownOpen ? 'active' : ''}`}
+                                        onClick={handleMobileUserButtonClick}
+                                    >
+                                        {isLoggedIn() ? <FaUserCircle/> : <IoIosLogIn/>}
+                                    </button>
+
+                                    {mobileUserDropdownOpen && isLoggedIn() && user && (
+                                        <div className="user-dropdown">
+                                            <div className="user-header">
+                                                <div className="user-avatar">
+                                                    {user.avatar ? <img src={user.avatar} alt="Avatar"/> :
+                                                        <FaUserCircle/>}
+                                                </div>
+                                                <div className="user-details">
+                                                    <div className="user-name">{user.name}</div>
+                                                    <div className="user-email">{user.email}</div>
+                                                </div>
+                                            </div>
+                                            <div className="user-menu-list">
+                                                {userMenuItems.map((item, index) => (
+                                                    <button key={index}
+                                                            className={`user-menu-item ${item.action === 'logout' ? 'logout' : ''}`}
+                                                            onClick={() => handleUserMenu(item)}>
+                                                        <item.icon/>
+                                                        <span>{item.label}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {mobileUserDropdownOpen && !isLoggedIn() && (
+                                        <div className="login-dropdown">
+                                            <button className="login-btn" onClick={() => navigate(path.login)}>
+                                                <IoIosLogIn/>
+                                                <span>Login to your account</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Right Actions - Desktop Icons and Search */}
+                    <div className={`navbar-right ${searchActive ? 'search-active' : ''}`}>
+                        {!searchActive ? (
+                            <>
+                                <button className="action-btn desktop-only" onClick={() => setSearchActive(true)}>
+                                    <FaSearch/>
+                                </button>
+
+                                <Link to={path.wishlist} className="action-btn desktop-only">
+                                    <IconWithBadge icon={FaHeart} count={wishlistCount}/>
+                                </Link>
+
+                                <Link to={path.cart} className="action-btn desktop-only">
+                                    <IconWithBadge icon={FaShoppingCart} count={cartCount}/>
+                                </Link>
+
+                                {/* Desktop User Menu */}
+                                <div className="user-menu" ref={userDropdownRef}>
+                                    <button
+                                        className={`action-btn user-btn ${userDropdownOpen ? 'active' : ''}`}
+                                        onClick={handleDesktopUserButtonClick}
+                                    >
+                                        {isLoggedIn() ? <FaUserCircle/> : <IoIosLogIn/>}
+                                    </button>
+
+                                    {userDropdownOpen && isLoggedIn() && user && (
+                                        <div className="user-dropdown">
+                                            <div className="user-header">
+                                                <div className="user-avatar">
+                                                    {user.avatar ? <img src={user.avatar} alt="Avatar"/> :
+                                                        <FaUserCircle/>}
+                                                </div>
+                                                <div className="user-details">
+                                                    <div className="user-name">{user.name}</div>
+                                                    <div className="user-email">{user.email}</div>
+                                                </div>
+                                            </div>
+                                            <div className="user-menu-list">
+                                                {userMenuItems.map((item, index) => (
+                                                    <button key={index}
+                                                            className={`user-menu-item ${item.action === 'logout' ? 'logout' : ''}`}
+                                                            onClick={() => handleUserMenu(item)}>
+                                                        <item.icon/>
+                                                        <span>{item.label}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {userDropdownOpen && !isLoggedIn() && (
+                                        <div className="login-dropdown">
+                                            <button className="login-btn" onClick={() => navigate(path.login)}>
+                                                <IoIosLogIn/>
+                                                <span>Login to your account</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         ) : (
-                            <div className="search-box">
-                                <input
-                                    type="text"
-                                    placeholder="Search products..."
-                                    value={searchText}
-                                    onChange={(e) => setSearchText(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') handleSearch();
-                                    }}
-                                    autoFocus
-                                />
+                            <div className="search-container">
+                                <input type="text" className="search-input" placeholder="Search products..."
+                                       value={searchText} onChange={(e) => setSearchText(e.target.value)}
+                                       onKeyDown={(e) => e.key === 'Enter' && handleSearch()} autoFocus/>
                                 <button className="search-btn" onClick={handleSearch}>
                                     <FaSearch/>
                                 </button>
-                                <button className="close-btn" onClick={handleSearchClose}>
+                                <button className="close-btn" onClick={() => setSearchActive(false)}>
                                     <FaTimes/>
                                 </button>
                             </div>
                         )}
                     </div>
                 </div>
-            </header>
+            </nav>
 
             {/* Bottom Navigation */}
             <div className="bottom-navigation">
                 {bottomNavItems.map((item) => {
                     const IconComponent = item.icon;
-                    const isSearchClose = item.id === 'search' && searchActive;
+                    const isActive = item.id === 'search'
+                        ? searchActive
+                        : activeBottomTab === item.id;
 
                     return (
-                        <div
-                            key={item.id}
-                            className={`bottom-nav-item ${
-                                item.id === 'search'
-                                    ? (searchActive ? 'active' : '')
-                                    : (activeBottomTab === item.id ? 'active' : '')
-                            }`}
-                            data-search-close={isSearchClose}
-                            onClick={() => handleBottomNavClick(item.id)}
-                        >
+                        <button key={item.id} className={`bottom-nav-item ${
+                            isActive ? 'active' : ''
+                        } ${item.id === 'search' && searchActive ? 'search-close' : ''}`}
+                                onClick={() => handleBottomNav(item.id)}>
                             {item.count !== undefined ? (
-                                <div className="icon-with-badge">
-                                    <IconComponent className="bottom-nav-icon"/>
-                                    {item.count > 0 && (
-                                        <span className="badge-counter">{item.count > 99 ? '99+' : item.count}</span>
-                                    )}
-                                </div>
+                                <IconWithBadge icon={IconComponent} count={item.count} className="bottom-icon"/>
                             ) : (
-                                <IconComponent className="bottom-nav-icon"/>
+                                <IconComponent className="bottom-icon"/>
                             )}
-                            <span className="bottom-nav-label">{item.label}</span>
-                        </div>
+                            <span className="bottom-label">{item.label}</span>
+                        </button>
                     );
                 })}
             </div>
-
-            {/* Mobile Sidebar */}
-            {mobileSidebarOpen && (
-                <div className="sidebar-overlay" onClick={() => setMobileSidebarOpen(false)}>
-                    <div className="mobile-sidebar" onClick={(e) => e.stopPropagation()}>
-                        <div className="sidebar-header">
-                            <div className="logo">
-                                <img src={logo} alt="Logo"/>
-                            </div>
-                            <FaTimes className="close-btn" onClick={() => setMobileSidebarOpen(false)}/>
-                        </div>
-                        <ul>
-                            {menuItems.map((item, index) => (
-                                <li key={index}>
-                                    <Link to={item.path || '#'}>{item.name}</Link>
-                                    {item.dropdown && (
-                                        <ul className="dropdown">
-                                            {item.dropdown.map((subItem, subIndex) => (
-                                                <li key={subIndex}>
-                                                    <a
-                                                        href="#"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            if (subItem.path && subItem.path !== '#') {
-                                                                navigate(subItem.path);
-                                                                setMobileSidebarOpen(false);
-                                                            }
-                                                        }}
-                                                    >
-                                                        {subItem.label}
-                                                    </a>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-
-                        {/* Mobile Login/User Section */}
-                        <div className="mobile-user-section">
-                            {isLoggedIn() ? (
-                                <div className="mobile-user-info">
-                                    <div className="user-avatar">
-                                        {user.avatar ? (
-                                            <img src={user.avatar} alt="User Avatar"/>
-                                        ) : (
-                                            <FaUserCircle/>
-                                        )}
-                                    </div>
-                                    <div className="user-details">
-                                        <h4>{user.name}</h4>
-                                        <p>{user.email}</p>
-                                    </div>
-                                    <button className="mobile-logout-btn" onClick={handleLogout}>
-                                        <FaSignOutAlt/>
-                                        Logout
-                                    </button>
-                                </div>
-                            ) : (
-                                <div onClick={handleLogin}>
-                                    <IoIosLogIn className="icon user-icon"/>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </>
     );
 };

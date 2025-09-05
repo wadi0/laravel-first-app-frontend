@@ -1,9 +1,9 @@
 .home-container {
   width: 100%;
-  margin: 20px auto;
+  margin: 0 auto;
   box-sizing: border-box;
-  max-width: 1220px;
-  padding: 0 20px;
+  max-width: 1200px;
+  padding: 20px;
 
   .hero-section {
     margin-bottom: 45px;
@@ -121,7 +121,6 @@
 @media (max-width: 1050px) and (min-width: 0px) {
   .home-container {
     width: 100%;
-    padding: 0 20px;
 
     .features-section {
       .features-grid {

@@ -2,7 +2,7 @@ const path = {
     login: "/sign-in",
     signup: "/sign-up",
     home: "/home",
-    product: "product",
+    product: "/product",
     cart: '/cart',
     wishlist: '/wishlist',
     checkout: '/checkout',
