@@ -1,4 +1,4 @@
-import {Routes, Route} from 'react-router-dom';
+import {Routes, Route, Navigate} from 'react-router-dom';
 import './App.css'
 import AuthLayout from "./components/layout/AuthLayout.jsx";
 import SignUp from "./pages/auth/SignUp.jsx";
@@ -34,6 +34,7 @@ function App() {
 
                     {/* Main App - All users can access these */}
                     <Route element={<MainLayout/>}>
+                        <Route path="/" element={<Navigate to={path.home} replace/>}/>
                         <Route path={path.home} element={<Home/>}/>
                         <Route path={path.product} element={<Product/>}/>
 
@@ -52,6 +53,7 @@ function App() {
                             <Route path={path.track_order_route} element={<TrackOrder/>}/>
                         </Route>
                     </Route>
+                    <Route path="*" element={<Navigate to={path.home} replace/>}/>
                 </Routes>
             </AppProvider>
         </ErrorBoundary>
