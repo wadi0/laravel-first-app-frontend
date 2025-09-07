@@ -172,14 +172,14 @@
             &:hover {
               background: linear-gradient(135deg, #f0f8ff 0%, #e0f2fe 100%);
               color: #2563eb;
-              transform: translateX(5px);
+              // transform: translateX(5px);
             }
 
             &.active {
               background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
               color: white;
               font-weight: 600;
-              transform: translateX(5px);
+              // transform: translateX(5px);
             }
           }
         }
