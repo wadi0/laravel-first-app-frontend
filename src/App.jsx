@@ -18,6 +18,7 @@ import OrderSuccess from "./pages/order/OrderSuccess.jsx";
 import Orders from "./pages/order/Order.jsx";
 import OrderDetails from "./pages/order/OrderDetails.jsx";
 import TrackOrder from "./pages/order/TrackOrder.jsx";
+import ComingSoon from './pages/comingSoon/ComingSoon.jsx';
 
 function App() {
     return (
@@ -51,6 +52,20 @@ function App() {
                             <Route path={path.orders} element={<Orders/>}/>
                             <Route path={path.order_details_route} element={<OrderDetails/>}/>
                             <Route path={path.track_order_route} element={<TrackOrder/>}/>
+                             {/* don't have component coming soon */}
+                             <Route path={path.featured_product} element={<ComingSoon/>}/>
+                             <Route path={path.best_seller} element={<ComingSoon/>}/>
+                             <Route path={path.about} element={<ComingSoon/>}/>
+                             <Route path={path.blog} element={<ComingSoon/>}/>
+                             <Route path={path.lates_post} element={<ComingSoon/>}/>
+                             <Route path={path.tutorials} element={<ComingSoon/>}/>
+                             <Route path={path.faq} element={<ComingSoon/>}/>
+                             <Route path={path.terms} element={<ComingSoon/>}/>
+                             <Route path={path.privacy} element={<ComingSoon/>}/>
+                             <Route path={path.contact} element={<ComingSoon/>}/>
+                             <Route path={path.profile} element={<ComingSoon/>}/>
+                             <Route path={path.settings} element={<ComingSoon/>}/>
+                             <Route path={path.support} element={<ComingSoon/>}/>
                         </Route>
                     </Route>
                     <Route path="*" element={<Navigate to={path.home} replace/>}/>

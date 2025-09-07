@@ -16,39 +16,8 @@ const FeaturedProducts = () => {
 
     const { cartItems, addToCart, removeFromCart, toggleWishlist } = useApp();
 
-    // Fetch categories
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                setLoading(true);
-                const res = await AxiosServices.get(ApiUrlServices.All_CATEGORIES_LIST);
-                const categoriesData = res.data.data.data || [];
-
-                // Add "All" category at the beginning
-                const categoriesWithAll = [
-                    { id: 'all', category_name: 'All' },
-                    ...categoriesData
-                ];
-
-                setCategories(categoriesWithAll);
-
-                // Initially fetch all products
-                fetchProducts('all');
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-                if (error.response?.status !== 401) {
-                    toast.error('Failed to load categories');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCategories();
-    }, []);
-
     // Fetch products based on category
-    const fetchProducts = async (categoryId) => {
+    const fetchProducts = useCallback(async (categoryId) => {
         try {
             setProductsLoading(true);
 
@@ -69,18 +38,51 @@ const FeaturedProducts = () => {
             setProducts(res.data.data || []);
         } catch (error) {
             console.error('Error fetching products:', error);
+            const errorMessage = error.response?.data?.message || 'Failed to load products';
             if (error.response?.status !== 401) {
-                toast.error('Failed to load products');
+                toast.error(errorMessage);
             }
         } finally {
             setProductsLoading(false);
         }
-    };
+    }, []);
+
+    // Fetch categories
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                setLoading(true);
+                const res = await AxiosServices.get(ApiUrlServices.All_CATEGORIES_LIST);
+                const categoriesData = res.data.data.data || [];
+
+                // Add "All" category at the beginning + limit to 4 more categories = 5 total
+                const categoriesWithAll = [
+                    { id: 'all', category_name: 'All' },
+                    ...categoriesData.slice(0, 4) // Only take first 4 categories
+                ];
+
+                setCategories(categoriesWithAll);
+
+                // Initially fetch all products
+                fetchProducts('all');
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                const errorMessage = error.response?.data?.message || 'Failed to load categories';
+                if (error.response?.status !== 401) {
+                    toast.error(errorMessage);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, [fetchProducts]);
 
     const handleCategoryChange = useCallback((categoryId, categoryName) => {
         setActiveFilter(categoryName);
         fetchProducts(categoryId);
-    }, []);
+    }, [fetchProducts]);
 
     // Handler functions that will be passed to ProductCard
     const handleAddToCart = useCallback(async (product) => {
@@ -116,12 +118,12 @@ const FeaturedProducts = () => {
                 {categories.map(category => (
                     <CustomSubmitButton
                         key={category.id}
-                        isLoading={loading && activeFilter === category.category_name}
+                        isLoading={productsLoading && activeFilter === category.category_name}
                         onClick={() => handleCategoryChange(category.id, category.category_name)}
                         type="button"
                         label={category.category_name?.toUpperCase() || 'CATEGORY'}
                         btnClassName={`filter-tab ${activeFilter === category.category_name ? 'active' : ''}`}
-                        disabled={loading}
+                        disabled={loading || productsLoading}
                     />
                 ))}
             </div>

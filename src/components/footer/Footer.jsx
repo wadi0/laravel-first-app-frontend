@@ -23,7 +23,7 @@ const Footer = () => {
       <div className="footer-content">
         {/* Company Info */}
         <div className="footer-section">
-          <h3 className="footer-title">About ModernShop</h3>
+          <h3 className="footer-title">ZAW Collection</h3>
           <p className="about-shop">We're dedicated to providing high-quality products with exceptional customer service. Your satisfaction is our top priority.</p>
           <div className="social-links">
             <a href="#" title="Facebook" aria-label="Facebook">f</a>

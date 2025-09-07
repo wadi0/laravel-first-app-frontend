@@ -47,27 +47,27 @@ const Navbar = () => {
             name: 'Product', path: path.product,
             dropdown: [
                 {label: 'All Products', path: path.product},
-                {label: 'Featured', path: '/products/featured'},
-                {label: 'Best Sellers', path: '/products/bestsellers'},
+                {label: 'Featured', path: path.featured_product},
+                {label: 'Best Sellers', path: path.best_seller},
             ],
         },
-        {name: 'About Us', path: '/about'},
+        {name: 'About Us', path: path.about},
         {
-            name: 'Blog', path: '/blog',
+            name: 'Blog', path: path.blog,
             dropdown: [
-                {label: 'Latest Posts', path: '/blog/latest'},
-                {label: 'Tutorials', path: '/blog/tutorials'},
+                {label: 'Latest Posts', path: path.lates_post},
+                {label: 'Tutorials', path: path.tutorials},
             ],
         },
         {
-            name: 'Pages', path: '/pages',
+            name: 'Pages', path: path.faq,
             dropdown: [
-                {label: 'FAQ', path: '/faq'},
-                {label: 'Terms', path: '/terms'},
-                {label: 'Privacy', path: '/privacy'},
+                {label: 'FAQ', path: path.faq},
+                {label: 'Terms', path: path.terms},
+                {label: 'Privacy', path: path.privacy},
             ],
         },
-        {name: 'Contact', path: '/contact'},
+        {name: 'Contact', path: path.contact},
     ];
 
     const bottomNavItems = [
@@ -79,11 +79,11 @@ const Navbar = () => {
     ];
 
     const userMenuItems = [
-        {icon: FaUser, label: 'My Profile', path: '#'},
+        {icon: FaUser, label: 'My Profile', path: path.profile},
         {icon: FaClipboardList, label: 'My Orders', path: path.orders},
         {icon: FaHeart, label: 'Wishlist', path: path.wishlist},
-        {icon: FaCog, label: 'Settings', path: '#'},
-        {icon: FaQuestionCircle, label: 'Help & Support', path: '#'},
+        {icon: FaCog, label: 'Settings', path: path.settings},
+        {icon: FaQuestionCircle, label: 'Help & Support', path: path.support},
         {icon: FaSignOutAlt, label: 'Logout', action: 'logout'},
     ];
 
